@@ -1,6 +1,6 @@
 package model
 
-import org.specs2.mutable.Specification
+import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.specification.Scope
 
 /**
@@ -8,7 +8,7 @@ import org.specs2.specification.Scope
  * User: daniels
  * Date: 5/10/14
  */
-class BoardSpec extends Specification {
+class BoardTest extends SpecificationWithJUnit {
 
   trait ctx extends Scope {
     implicit val size = Size(4)

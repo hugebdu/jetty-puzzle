@@ -1,6 +1,6 @@
 package actors
 
-import org.specs2.mutable.Specification
+import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.specification.{After, Scope}
 import akka.testkit._
 import org.specs2.time.NoTimeConversions
@@ -17,7 +17,7 @@ import GameActor._
  * User: daniels
  * Date: 5/16/14
  */
-class GameActorSpec extends Specification with NoTimeConversions with Mockito {
+class GameActorTest extends SpecificationWithJUnit with NoTimeConversions with Mockito {
 
   trait ctx extends TestKitBase with ImplicitSender with Scope with After {
 

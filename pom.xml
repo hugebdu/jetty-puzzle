@@ -9,12 +9,6 @@
 
     <name>Puzzle Server</name>
 
-    <!--<parent>-->
-        <!--<groupId>com.wixpress.common</groupId>-->
-        <!--<artifactId>wix-scala-parent-ng</artifactId>-->
-        <!--<version>100.0.0-SNAPSHOT</version>-->
-    <!--</parent>-->
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jetty.version>9.1.4.v20140401</jetty.version>
@@ -22,23 +16,57 @@
         <scala.dependencies.version>2.10</scala.dependencies.version>
         <specs2.version>2.3.11</specs2.version>
         <akka.version>2.3.2</akka.version>
+        <json4s.version>3.2.4</json4s.version>
     </properties>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>net.alchim31.maven</groupId>
+                    <artifactId>scala-maven-plugin</artifactId>
+                    <version>3.1.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.0.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
-                <configuration>
-                    <args>
-                        <arg>-unchecked</arg>
-                        <arg>-deprecation</arg>
-                        <arg>-explaintypes</arg>
-                    </args>
-                    <addJavacArgs>-deprecation</addJavacArgs>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
+                <executions>
+                    <execution>
+                        <id>scala-compile-first</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>scala-test-compile</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -90,6 +118,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.json4s</groupId>
+            <artifactId>json4s-native_${scala.dependencies.version}</artifactId>
+            <version>${json4s.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.specs2</groupId>
             <artifactId>specs2-core_${scala.dependencies.version}</artifactId>
             <scope>test</scope>
@@ -104,12 +138,18 @@
         </dependency>
 
         <dependency>
+            <groupId>org.specs2</groupId>
+            <artifactId>specs2-junit_${scala.dependencies.version}</artifactId>
+            <version>${specs2.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>io.backchat.hookup</groupId>
             <artifactId>hookup_${scala.dependencies.version}</artifactId>
             <version>0.2.3</version>
             <scope>test</scope>
         </dependency>
-
 
     </dependencies>
 </project>
