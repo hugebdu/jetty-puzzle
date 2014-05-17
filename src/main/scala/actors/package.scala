@@ -1,5 +1,4 @@
 import actors.Messages.Message
-import org.eclipse.jetty.websocket.api.RemoteEndpoint
 import org.json4s._
 
 /**
@@ -10,12 +9,6 @@ import org.json4s._
 package object actors {
 
   import json.JsonSupport._
-
-  implicit class RichRemoteEndpoint(val endpoint: RemoteEndpoint) extends AnyVal {
-    def ! (msg: Message): Unit = {
-      endpoint.sendString(msg.toJSONString)
-    }
-  }
 
   implicit class MessageWithJsonString(val msg: Message) extends AnyVal {
     def toJSONString: String = asString(msg)

@@ -10,17 +10,10 @@ import json.JsonSupport
  * User: daniels
  * Date: 5/16/14
  */
-class PlayerActor(endpoint: RemoteEndpoint) extends Actor with JsonSupport {
-
-  type MessageHandler = PartialFunction[Message, Unit]
-
-  def onMessage: MessageHandler = {
-    case Click(index) => endpoint ! InvalidMove()
-  }
+class PlayerActor(endpoint: Endpoint) extends Actor with JsonSupport {
 
   def receive: Receive = {
-    case "hello" => endpoint.sendString("world")
-    case JsonMessage(msg) if onMessage isDefinedAt msg => onMessage(msg)
+    case JsonMessage(Click(index)) => endpoint ! InvalidMove()
   }
 
   object JsonMessage {
@@ -29,6 +22,24 @@ class PlayerActor(endpoint: RemoteEndpoint) extends Actor with JsonSupport {
       case _ => None
     }
   }
+}
+
+trait Endpoint {
+  def ! (m: Message): Unit
+}
+
+object Endpoint {
+
+  def apply(websocket: RemoteEndpoint): Endpoint = new Endpoint {
+    override def !(m: Message): Unit = {
+      websocket.sendString(m.toJSONString)
+    }
+  }
+}
+
+object PlayerActor {
+
+
 }
 
 object Messages {

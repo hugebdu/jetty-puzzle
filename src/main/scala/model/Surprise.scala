@@ -10,6 +10,13 @@ trait SurpriseProducer {
   def maybeSurprise(boards: (Board, Board)): Option[Surprise]
 }
 
+object DefaultSurpriseProducer extends SurpriseProducer {
+
+  def maybeSurprise(boards: (Board, Board)): Option[Surprise] = {
+    ???
+  }
+}
+
 trait Surprise {
   def question: Ask
   type Ask

@@ -1,12 +1,7 @@
 package actors
 
-import org.specs2.mutable.SpecificationWithJUnit
-import org.specs2.specification.{After, Scope}
 import akka.testkit._
-import org.specs2.time.NoTimeConversions
-import akka.actor.ActorSystem
 import model._
-import org.specs2.mock.Mockito
 import collection.mutable
 import model.Size
 import model.Piece
@@ -17,15 +12,9 @@ import GameActor._
  * User: daniels
  * Date: 5/16/14
  */
-class GameActorTest extends SpecificationWithJUnit with NoTimeConversions with Mockito {
+class GameActorTest extends ActorSpec {
 
-  trait ctx extends TestKitBase with ImplicitSender with Scope with After {
-
-    implicit lazy val system = ActorSystem()
-
-    def after = {
-      TestKit.shutdownActorSystem(system)
-    }
+  trait ctx extends ActorScope {
 
     implicit val size = Size(4)
 

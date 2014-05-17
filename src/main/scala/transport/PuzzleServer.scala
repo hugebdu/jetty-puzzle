@@ -9,7 +9,7 @@ import org.eclipse.jetty.util.resource.Resource
 import org.eclipse.jetty.websocket.servlet._
 import org.eclipse.jetty.websocket.api.{Session, WebSocketAdapter}
 import akka.actor.{Props, ActorRef, ActorSystem}
-import actors.PlayerActor
+import actors.{Endpoint, PlayerActor}
 
 class PuzzleServer extends Server {
   implicit val system = ActorSystem()
@@ -36,7 +36,7 @@ class PuzzleServer extends Server {
 
     override def onWebSocketConnect(session: Session) {
       super.onWebSocketConnect(session)
-      actor = system.actorOf(Props(new PlayerActor(session.getRemote)))
+      actor = system.actorOf(Props(new PlayerActor(Endpoint(session.getRemote))))
     }
 
     override def onWebSocketText(message: String) {
