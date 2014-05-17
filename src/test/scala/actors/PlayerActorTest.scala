@@ -1,7 +1,7 @@
 package actors
 
 import akka.testkit.{TestProbe, TestActorRef}
-import actors.GamesRegistryActor.WaitingForPair
+import actors.GamesRegistryActor.{UnknownInvitation, WaitingForPair}
 import concurrent.duration._
 import model.{Turn, Id}
 import actors.GameActor.{Swap, GameFinished, Click}
@@ -45,6 +45,17 @@ class PlayerActorTest extends ActorSpec {
 
       got {
         one(endpoint) ! Messages.InitGame("image.gif")
+      }
+    }
+  }
+
+  "UnknownInvitation" should {
+
+    "propagate to endpoint" in new ctx {
+      player ! UnknownInvitation
+
+      got {
+        one(endpoint) ! Messages.UnknownInvitation()
       }
     }
   }

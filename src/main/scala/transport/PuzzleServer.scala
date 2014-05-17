@@ -10,6 +10,7 @@ import org.eclipse.jetty.websocket.servlet._
 import org.eclipse.jetty.websocket.api.{Session, WebSocketAdapter}
 import akka.actor.{Props, ActorRef, ActorSystem}
 import actors.{GamesRegistryActor, Endpoint, PlayerActor}
+import actors.GamesRegistryActor.Join
 
 class PuzzleServer extends Server {
   implicit val system = ActorSystem()
@@ -25,20 +26,22 @@ class PuzzleServer extends Server {
   setHandler(context)
 
   val holderEvents = new ServletHolder("ws-events", new PuzzleServlet)
-  context.addServlet(holderEvents, "/ws/*")
+  context.addServlet(holderEvents, "/ws/game/*")
 
   val handler = new ResourceHandler
   handler.setBaseResource(Resource.newClassPathResource("web"))
   handler.setDirectoriesListed(true)
   context.setHandler(handler)
 
-  class PuzzleSocket extends WebSocketAdapter {
+  class PuzzleSocket(gameId: String) extends WebSocketAdapter {
 
     var actor: ActorRef = _
 
     override def onWebSocketConnect(session: Session) {
       super.onWebSocketConnect(session)
+      println(gameId)
       actor = system.actorOf(Props(new PlayerActor(Endpoint(session.getRemote))))
+      gamesRegistry ! Join(gameId, actor)
     }
 
     override def onWebSocketText(message: String) {
@@ -61,7 +64,7 @@ class PuzzleServer extends Server {
     def configure(factory: WebSocketServletFactory) {
       factory.setCreator(new WebSocketCreator {
         def createWebSocket(req: ServletUpgradeRequest, resp: ServletUpgradeResponse): AnyRef = {
-          new PuzzleSocket
+          new PuzzleSocket(req.getRequestPath.split('/').last)
         }
       })
     }

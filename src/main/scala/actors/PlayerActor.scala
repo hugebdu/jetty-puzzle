@@ -4,7 +4,7 @@ import akka.actor.{ActorRef, Actor}
 import org.eclipse.jetty.websocket.api.RemoteEndpoint
 
 import json.JsonSupport
-import actors.GamesRegistryActor.{InitGame, WaitingForPair}
+import actors.GamesRegistryActor.{UnknownInvitation, InitGame, WaitingForPair}
 import model.Turn
 import actors.GameActor.{Swap, GameFinished, Click}
 
@@ -28,14 +28,14 @@ class PlayerActor(endpoint: Endpoint) extends Actor with JsonSupport {
 
   def receive: Receive = {
 
+    case UnknownInvitation => endpoint ! Messages.UnknownInvitation()
+
     case WaitingForPair => endpoint ! Messages.WaitingForPair()
 
     case InitGame(id, turn, imageUrl, gameActor) =>
       endpoint ! Messages.InitGame(imageUrl)
       game = InGame(turn, gameActor)
       context.become(playing)
-
-    case JsonMessage(Messages.Click(index)) => endpoint ! Messages.InvalidMove()
   }
 
   object JsonMessage {
@@ -79,6 +79,7 @@ object Messages {
     classOf[WaitingForPair],
     classOf[InitGame],
     classOf[InvalidMove],
+    classOf[UnknownInvitation],
     classOf[Swap],
     classOf[GameFinished]
   )
@@ -88,6 +89,7 @@ object Messages {
   case class InvalidMove() extends Message
   case class WaitingForPair() extends Message
   case class InitGame(imageUrl: String) extends Message
+  case class UnknownInvitation() extends Message
   case class GameFinished(winner: Boolean) extends Message
   case class Swap(indexes: (Int, Int)*) extends Message
 }
