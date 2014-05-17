@@ -21,12 +21,14 @@ class GamesRegistryActor extends Actor with GameActorConstruction with BoardCons
   def receive: Receive = {
 
     case CreateInvitation(image) =>
+
       val invitation = Invitation(image = image)
       val id = Id.random()
       invitations += (id -> invitation)
       sender ! id
 
     case Join(id, player) =>
+
       invitations.get(id).fold[Unit](player ! UnknownInvitation) {
 
         case i @ Invitation(_, Nil) =>

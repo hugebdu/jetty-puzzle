@@ -9,10 +9,12 @@ import org.eclipse.jetty.util.resource.Resource
 import org.eclipse.jetty.websocket.servlet._
 import org.eclipse.jetty.websocket.api.{Session, WebSocketAdapter}
 import akka.actor.{Props, ActorRef, ActorSystem}
-import actors.{Endpoint, PlayerActor}
+import actors.{GamesRegistryActor, Endpoint, PlayerActor}
 
 class PuzzleServer extends Server {
   implicit val system = ActorSystem()
+
+  val gamesRegistry = system.actorOf(Props[GamesRegistryActor])
 
   val connector = new ServerConnector(this)
   connector.setPort(8080)
