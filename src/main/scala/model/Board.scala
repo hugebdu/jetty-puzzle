@@ -30,6 +30,13 @@ case class Board(cells: mutable.IndexedSeq[Cell])(implicit size: Size) {
     }
   }
 
+  def inAndOutOfPlace: (Seq[Piece], Seq[Piece]) = {
+    val removeIndex: ((Cell, Int)) => Cell = _._1
+    val piecesOnly: PartialFunction[Cell, Piece] = { case p: Piece => p }
+    val (in, out) = cells.zipWithIndex partition inPlace
+    (in map removeIndex collect piecesOnly, out map removeIndex collect piecesOnly)
+  }
+
   def percentCompleted: Double = {
     (cells.zipWithIndex count inPlace).toDouble / cells.length
   }
