@@ -10,16 +10,20 @@ import scala.util.Random
  */
 case class Board(cells: mutable.IndexedSeq[Cell]) {
 
-  implicit val size = Size(cells.length / 2)
+  implicit val size = Size(math.sqrt(cells.length.toDouble).toInt)
 
   def shuffle(): Unit = {
-    swap(indexOf(Empty) -> (cells.length - 1))
+    swap(positionOf(Empty) -> Position(cells.length - 1))
     val shuffled = Random.shuffle(cells.take(cells.length - 1))
     shuffled.zipWithIndex map { _.swap } foreach { (cells.update _).tupled }
   }
 
   def click(index: Int): Option[(Int, Int)] = {
     click(Position(index))
+  }
+
+  def cellsWithPosition: Seq[(Cell, Position)] = {
+    cells.zipWithIndex map { case (cell, index) => (cell, Position(index)) }
   }
 
   def click(position: Position): Option[(Int, Int)] = {
@@ -56,18 +60,14 @@ case class Board(cells: mutable.IndexedSeq[Cell]) {
 
   private def cells(p: Position): Cell = cells(p.index)
 
-  private def indexOf(c: Cell): Int = {
-    cells.indexWhere(_ == c)
+  private def positionOf(c: Cell): Position = {
+    Position(cells.indexWhere(_ == c))
   }
 
-  private def swap(p: (Position, Position)): Unit = {
-    swap(p._1.index -> p._2.index)
-  }
-
-  private def swap(p: (Int, Int)): Unit = {
-    val tmp = cells(p._1)
-    cells.update(p._1, cells(p._2))
-    cells.update(p._2, tmp)
+  def swap(p: (Position, Position)): Unit = {
+    val tmp = cells(p._1.index)
+    cells.update(p._1.index, cells(p._2.index))
+    cells.update(p._2.index, tmp)
   }
 
   def prettyString: String = {
@@ -145,7 +145,9 @@ trait DistanceMap {
 
 object DistanceMap {
 
-  def apply()(implicit size: Size): DistanceMap = {
+  def apply(size: Size): DistanceMap = {
+
+    implicit val s = size
 
     val matrix = Array.fill(size.square, size.square)(0)
     for (i <- 0 until size.square) {
@@ -177,10 +179,28 @@ object DistanceMap {
 
 case class Size(value: Int) extends AnyVal {
   def square: Int = value * value
+  def last: Int = square - 1
 }
 
-sealed trait Cell
-case object Empty extends Cell
-case class Piece(id: Int) extends Cell
+sealed trait Cell {
+  def place(implicit size: Size): Position
+  def distanceFromPlace(p: Position)(implicit size: Size): Int = {
+    place.distanceTo(p)
+  }
+}
+
+case object Empty extends Cell {
+
+  def place(implicit size: Size): Position = {
+    Position(size.last)
+  }
+}
+
+case class Piece(id: Int) extends Cell {
+
+  def place(implicit size: Size): Position = {
+    Position(id)
+  }
+}
 
 

@@ -15,7 +15,7 @@ class DistanceMapTest extends SpecificationWithJUnit {
 
       implicit val size = Size(2)
 
-      val map = DistanceMap()
+      val map = DistanceMap(size)
 
       map.distances(Position(0)) must contain(exactly(
         Position(3),
@@ -29,7 +29,7 @@ class DistanceMapTest extends SpecificationWithJUnit {
 
       implicit val size = Size(3)
 
-      val map = DistanceMap()
+      val map = DistanceMap(size)
 
       map.distances(Position(4)) must contain(exactly(
         Position(0),

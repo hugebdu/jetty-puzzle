@@ -16,6 +16,13 @@ class BoardTest extends SpecificationWithJUnit {
     lazy val board = Board.create()
   }
 
+  "size" should {
+
+    "be correct" in new ctx {
+      board.size === size
+    }
+  }
+
   "percentCompleted" should {
 
     "be 1 for completed board" in new ctx {

@@ -1,7 +1,7 @@
 package model
 
 import model.Surprise.{Answer, Challenge}
-import actors.GameActor.{CompleteSurprise, Swap}
+import actors.GameActor.CompleteSurprise
 
 /**
  * Created with IntelliJ IDEA.
@@ -46,10 +46,27 @@ object PrisonersDilemma {
   case class Config(cooperation: (Int, Int) = (-1, -1), defection: (Int, Int) = (-2, -2), cooperationVsDefection: (Int, Int) = (0, -3))
 }
 
-private[model] trait Tossing {
+private[model] trait DeterministicTossing {
 
-  def toss(board: Board, count: Int): Seq[(Int, Int)] = {
-    ???
+  private val gainFunc: ((Int, (Position, Position))) => Int = _._1
+
+  def toss(board: Board, count: Int): Seq[(Position, Position)] = {
+
+    if (count == 0) Nil else {
+
+      implicit val size = board.size
+
+      val swaps = board.cellsWithPosition.combinations(2).map {
+        case Seq((c1, p1), (c2, p2)) =>
+          val current = c1.distanceFromPlace(p1) + c2.distanceFromPlace(p2)
+          val possible = c1.distanceFromPlace(p2) + c2.distanceFromPlace(p1)
+          val gain = possible - current
+          gain -> (p1, p2)
+      }.toSeq.sortBy(gainFunc).takeRight(count) map { case (_, p) => p }
+
+      swaps foreach board.swap
+      swaps
+    }
   }
 }
 
