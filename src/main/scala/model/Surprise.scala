@@ -1,7 +1,9 @@
 package model
 
-import model.Surprise.{Drop, Pick, Answer, Challenge}
+import model.Surprise._
 import actors.GameActor.CompleteSurprise
+import model.Surprise.Challenge
+import scala.util.Random
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,8 +17,16 @@ trait SurpriseProducer {
 
 object DefaultSurpriseProducer extends SurpriseProducer {
 
+  private val dilemmas = IndexedSeq(
+    new DilemmaSurprise(Config(1, 2, (0, 3), 0.2), "prisoners") with DeterministicTossing,
+    new DilemmaSurprise(Config(0, 10, (2, 0), 0.2), "chicken") with DeterministicTossing
+  )
+
   def maybeSurprise(boards: (Board, Board)): Option[Surprise] = {
-    ???
+    dilemmas filter { _.isEligible(boards) } match {
+      case Seq() => None
+      case nonEmpty => Some(nonEmpty(Random.nextInt(nonEmpty.length)))
+    }
   }
 }
 
@@ -26,10 +36,10 @@ trait Surprise {
   def handle(outcomes: ((Board, Answer), (Board, Answer))): (CompleteSurprise, CompleteSurprise)
   def isEligible(boards: (Board, Board)): Boolean
 
-  protected def kind: String
+  def kind: String
 }
 
-class PrisonersDilemma(config: PrisonersDilemma.Config = PrisonersDilemma.Config()) extends Surprise { this: Tossing =>
+class DilemmaSurprise(config: Config = Config(), val kind: String) extends Surprise { this: Tossing =>
 
   def isEligible(boards: (Board, Board)): Boolean = {
     Seq(boards._1.percentCompleted, boards._2.percentCompleted) exists { _ >= config.eligibilityThreshold }
@@ -44,15 +54,6 @@ class PrisonersDilemma(config: PrisonersDilemma.Config = PrisonersDilemma.Config
       case ((b1, Drop), (b2, Pick)) => (CompleteSurprise(toss(b1, cooperationVsDefection._2)), CompleteSurprise(toss(b2, cooperationVsDefection._1)))
     }
   }
-
-  protected val kind = "prisoners"
-}
-
-object PrisonersDilemma {
-  case class Config(cooperation: Int = 1,
-                    defection: Int = 2,
-                    cooperationVsDefection: (Int, Int) = (0, 3),
-                    eligibilityThreshold: Double = 0.2)
 }
 
 private[model] trait Tossing {
@@ -84,6 +85,11 @@ private[model] trait DeterministicTossing extends Tossing {
 }
 
 object Surprise {
+
+  case class Config(cooperation: Int = 1,
+                    defection: Int = 2,
+                    cooperationVsDefection: (Int, Int) = (0, 3),
+                    eligibilityThreshold: Double = 0.2)
   
   case class Challenge(kind: String)
 

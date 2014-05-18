@@ -3,8 +3,7 @@ package model
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
-import PrisonersDilemma._
-import model.Surprise.{Pick, Drop}
+import model.Surprise.{Config, Pick, Drop}
 import actors.GameActor.CompleteSurprise
 
 /**
@@ -12,7 +11,7 @@ import actors.GameActor.CompleteSurprise
  * User: daniels
  * Date: 5/18/14
  */
-class PrisonersDilemmaTest extends SpecificationWithJUnit with Mockito {
+class DilemmaSurpriseTest extends SpecificationWithJUnit with Mockito {
 
   trait ctx extends Scope {
 
@@ -42,7 +41,7 @@ class PrisonersDilemmaTest extends SpecificationWithJUnit with Mockito {
       }
     }
 
-    def dilemma(config: Config = Config()) = new PrisonersDilemma(config) with MockedTossing
+    def dilemma(config: Config = Config()) = new DilemmaSurprise(config, "kind") with MockedTossing
   }
 
   "handle" should {
