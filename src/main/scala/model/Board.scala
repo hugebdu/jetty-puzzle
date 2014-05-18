@@ -8,7 +8,9 @@ import scala.util.Random
  * User: daniels
  * Date: 5/10/14
  */
-case class Board(cells: mutable.IndexedSeq[Cell])(implicit size: Size) {
+case class Board(cells: mutable.IndexedSeq[Cell]) {
+
+  implicit val size = Size(cells.length / 2)
 
   def shuffle(): Unit = {
     swap(indexOf(Empty) -> (cells.length - 1))
@@ -28,13 +30,6 @@ case class Board(cells: mutable.IndexedSeq[Cell])(implicit size: Size) {
         position.index -> p.index
       }
     }
-  }
-
-  def inAndOutOfPlace: (Seq[Piece], Seq[Piece]) = {
-    val removeIndex: ((Cell, Int)) => Cell = _._1
-    val piecesOnly: PartialFunction[Cell, Piece] = { case p: Piece => p }
-    val (in, out) = cells.zipWithIndex partition inPlace
-    (in map removeIndex collect piecesOnly, out map removeIndex collect piecesOnly)
   }
 
   def percentCompleted: Double = {
@@ -99,9 +94,21 @@ case class Position private(index: Int, row: Int, column: Int)(implicit size: Si
   }
 
   def neighbourhood: Seq[Position] = Seq(left, right, up, down) collect { case Some(p) => p }
+
+  /** Manhattan distance */
+  def distanceTo(other: Position): Int = {
+    math.abs(row - other.row) + math.abs(column - other.column)
+  }
+
+  override def toString: String = s"Position(row=$row,column=$column,index=$index)"
 }
 
 object Position {
+
+  def unapply(index: Int)(implicit size: Size): Option[(Int, Int)] = {
+    val p = Position(index)
+    Some(p.row -> p.column)
+  }
 
   def apply(index: Int)(implicit size: Size): Position = {
     if (index < 0 || index >= size.square) throw new IndexOutOfBoundsException(s"Invalid index $index")
@@ -122,8 +129,6 @@ object Position {
 
 object Board {
 
-//  val Size = 4
-
   def create()(implicit size: Size): Board = {
     val cells = new mutable.ArrayBuffer[Cell](size.square)
     for (i <- 0 until size.square - 1) {
@@ -133,6 +138,42 @@ object Board {
     Board(cells)
   }
 }
+
+trait DistanceMap {
+  def distances(p: Position): Seq[Position]
+}
+
+object DistanceMap {
+
+  def apply()(implicit size: Size): DistanceMap = {
+
+    val matrix = Array.fill(size.square, size.square)(0)
+    for (i <- 0 until size.square) {
+      for (j <- 0 until size.square) {
+        matrix(j)(i) = Position(i).distanceTo(Position(j))
+      }
+    }
+
+    val byDistanceByPosition: ((Int, Int), (Int, Int)) => Boolean = {
+      case ((d1, _), (d2, _)) if d1 != d2 => d1 > d2
+      case ((_, Position(r1, _)), (_, Position(r2, _))) if r1 != r2 => r1 < r2
+      case ((_, Position(_, c1)), (_, Position(_, c2))) => c1 < c2
+    }
+
+    val toPosition: ((Int, Int)) => Position = { case (_, index) => Position(index) }
+
+    val distancesMap = (matrix.zipWithIndex map {
+      case (arr, index) =>
+        val distances = arr.zipWithIndex sortWith byDistanceByPosition map toPosition
+        Position(index) -> distances
+    }).toMap
+
+    new DistanceMap {
+      def distances(p: Position): Seq[Position] = distancesMap(p)
+    }
+  }
+}
+
 
 case class Size(value: Int) extends AnyVal {
   def square: Int = value * value

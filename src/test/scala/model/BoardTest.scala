@@ -2,7 +2,6 @@ package model
 
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.specification.Scope
-import collection.mutable
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,25 +14,6 @@ class BoardTest extends SpecificationWithJUnit {
     implicit val size = Size(4)
 
     lazy val board = Board.create()
-  }
-
-  "inAndOutOfPlace" should {
-
-    "handle finished board" in new ctx {
-      val (in, out) = board.inAndOutOfPlace
-
-      in must haveSize(size.square - 1)
-      out must beEmpty
-    }
-
-    "handle general case" in new ctx {
-      override implicit val size: Size = Size(2)
-
-      val (in, out) = Board(mutable.IndexedSeq(Piece(1), Piece(0), Piece(2), Empty)).inAndOutOfPlace
-
-      in must contain(exactly(Piece(2)))
-      out must contain(exactly(Piece(0), Piece(1)))
-    }
   }
 
   "percentCompleted" should {
