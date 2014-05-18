@@ -4,9 +4,15 @@ import akka.actor.{ActorRef, Actor}
 import org.eclipse.jetty.websocket.api.RemoteEndpoint
 
 import json.JsonSupport
-import actors.GamesRegistryActor.{UnknownInvitation, InitGame, WaitingForPair}
+import actors.GamesRegistryActor.{UnknownInvitation, WaitingForPair}
 import model.Turn
-import actors.GameActor.{Swap, GameFinished, Click}
+import actors.GameActor._
+import actors.GameActor.PickedSurprise
+import model.Surprise.Challenge
+import actors.GameActor.Swap
+import actors.GamesRegistryActor.InitGame
+import actors.GameActor.GameFinished
+import actors.GameActor.Click
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,6 +23,10 @@ class PlayerActor(endpoint: Endpoint) extends Actor with JsonSupport {
 
   var game: InGame = _
 
+  def challenged: Receive = {
+    case JsonMessage(Messages.ChallengeOutcome(picked)) => game.actor ! (if (picked) PickedSurprise(game.turn) else DroppedSurprise(game.turn))
+  }
+
   def playing: Receive = {
 
     case JsonMessage(Messages.Click(index)) => game.actor ! Click(game.turn, index)
@@ -24,6 +34,10 @@ class PlayerActor(endpoint: Endpoint) extends Actor with JsonSupport {
     case GameFinished(winner) => endpoint ! Messages.GameFinished(winner == game.turn)
 
     case Swap(pieces) => endpoint ! Messages.Swap(pieces)
+
+    case Challenge(kind) =>
+      endpoint ! Messages.Challenge(kind, PlayerActor.ChallengeTimeoutInSeconds)
+      context.become(challenged)
   }
 
   def receive: Receive = {
@@ -66,7 +80,7 @@ object Endpoint {
 }
 
 object PlayerActor {
-
+  val ChallengeTimeoutInSeconds = 4
 
 }
 
@@ -80,6 +94,8 @@ object Messages {
     classOf[InitGame],
     classOf[InvalidMove],
     classOf[UnknownInvitation],
+    classOf[Challenge],
+    classOf[ChallengeOutcome],
     classOf[Swap],
     classOf[GameFinished]
   )
@@ -92,4 +108,6 @@ object Messages {
   case class UnknownInvitation() extends Message
   case class GameFinished(winner: Boolean) extends Message
   case class Swap(indexes: (Int, Int)*) extends Message
+  case class Challenge(kind: String, timeoutInSeconds: Int) extends Message
+  case class ChallengeOutcome(picked: Boolean) extends Message
 }

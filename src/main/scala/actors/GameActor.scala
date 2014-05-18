@@ -25,8 +25,8 @@ class GameActor(surprises: SurpriseProducer) extends Actor {
     case CheckForSurprises =>
       for (s <- surprises.maybeSurprise(left.board, right.board)) {
         surprise = SurpriseInProgress(s)
-        left.actor ! s.question
-        right.actor ! s.question
+        left.actor ! s.challenge()
+        right.actor ! s.challenge()
         become(surprised)
       }
 

@@ -1,5 +1,7 @@
 package model
 
+import model.Surprise.Challenge
+
 /**
  * Created with IntelliJ IDEA.
  * User: daniels
@@ -18,11 +20,12 @@ object DefaultSurpriseProducer extends SurpriseProducer {
 }
 
 trait Surprise {
-  def question: Ask
-  type Ask
+  def challenge(): Challenge
 }
 
 object Surprise {
+  
+  case class Challenge(kind: String)
 
   sealed trait Answer
   case object Pick extends Answer

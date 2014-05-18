@@ -6,6 +6,7 @@ import collection.mutable
 import model.Size
 import model.Piece
 import GameActor._
+import model.Surprise.Challenge
 
 /**
  * Created with IntelliJ IDEA.
@@ -60,8 +61,8 @@ class GameActorTest extends ActorSpec {
       surprises.maybeSurprise(leftBoard -> rightBoard) returns Some(DummySurprise)
       game ! CheckForSurprises
 
-      leftPlayer.expectMsg(DummySurprise.DummyAsk)
-      rightPlayer.expectMsg(DummySurprise.DummyAsk)
+      leftPlayer.expectMsg(Challenge("prisoner"))
+      rightPlayer.expectMsg(Challenge("prisoner"))
     }
 
     "on surprise - ignore clicks" in new startedGame {
@@ -119,10 +120,5 @@ class GameActorTest extends ActorSpec {
 }
 
 case object DummySurprise extends Surprise {
-
-  val question = DummyAsk
-
-  type Ask = DummyAsk.type
-
-  case object DummyAsk
+  def challenge() = Challenge("prisoner")
 }

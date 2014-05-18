@@ -4,7 +4,14 @@ import akka.testkit.{TestProbe, TestActorRef}
 import actors.GamesRegistryActor.{UnknownInvitation, WaitingForPair}
 import concurrent.duration._
 import model.{Turn, Id}
-import actors.GameActor.{Swap, GameFinished, Click}
+import actors.GameActor._
+import akka.actor.ActorRef
+import actors.Messages.Message
+import actors.GameActor.PickedSurprise
+import model.Surprise.Challenge
+import actors.GameActor.Swap
+import actors.GameActor.GameFinished
+import actors.GameActor.Click
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,6 +19,13 @@ import actors.GameActor.{Swap, GameFinished, Click}
  * Date: 5/17/14
  */
 class PlayerActorTest extends ActorSpec {
+
+  implicit class ActorRefWithJsonSend(ref: ActorRef) {
+
+    def !! (m: Message): Unit = {
+      ref ! m.toJSONString
+    }
+  }
 
   trait ctx extends ActorScope {
 
@@ -25,6 +39,46 @@ class PlayerActorTest extends ActorSpec {
 
   trait gameInitialized extends ctx {
     player ! GamesRegistryActor.InitGame(Id.random(), Turn.Left, "image.gif", game.ref)
+  }
+
+  trait challenged extends ctx {
+    player ! Challenge("prisoner")
+  }
+
+  "ChallengeOutcome" should {
+
+    "propagate picked to game" in new ctx with gameInitialized with challenged {
+      player !! Messages.ChallengeOutcome(picked = true)
+
+      game.expectMsg(PickedSurprise(Turn.Left))
+    }
+
+    "propagate dropped to game" in new ctx with gameInitialized with challenged {
+      player !! Messages.ChallengeOutcome(picked = false)
+
+      game.expectMsg(DroppedSurprise(Turn.Left))
+    }
+  }
+  
+  "Challenge" should {
+
+    "propagate to endpoint" in new ctx with gameInitialized {
+      
+      player ! Challenge("prisoner")
+      
+      got {
+        one(endpoint) ! Messages.Challenge("prisoner", PlayerActor.ChallengeTimeoutInSeconds)
+      }
+    }
+
+    "stop accepting Click messages" in new ctx with gameInitialized {
+
+      player ! Challenge("prisoner")
+
+      player !! Messages.Click(24)
+
+      game.expectNoMsg(3.seconds)
+    }
   }
 
   "Swap" should {
@@ -63,13 +117,13 @@ class PlayerActorTest extends ActorSpec {
   "Click" should {
 
     "be ignored when not in a game" in new ctx {
-      player ! Messages.Click(24)
+      player !! Messages.Click(24)
 
       game.expectNoMsg()
     }
 
     "propagated to game actor" in new ctx with gameInitialized {
-      player ! Messages.Click(24).toJSONString
+      player !! Messages.Click(24)
 
       game.expectMsg(Click(Turn.Left, 24))
     }
