@@ -3,7 +3,6 @@ package actors
 import akka.actor.{ActorRef, Actor}
 import model._
 import collection.mutable
-import actors.GameActor.CompleteSurprise
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,9 +14,9 @@ class GameActor(surprises: SurpriseProducer) extends Actor {
   import GameActor._
   import context._
 
-  var left: Player = _
-  var right: Player = _
-  var surprise: SurpriseInProgress = _
+  private[this] var left: Player = _
+  private[this] var right: Player = _
+  private[this] var surprise: SurpriseInProgress = _
   
   def completeSurprise(swaps: (CompleteSurprise, CompleteSurprise)): Unit = {
     left.actor ! swaps._1
@@ -65,21 +64,27 @@ class GameActor(surprises: SurpriseProducer) extends Actor {
     case Turn.Left => left.board
     case Turn.Right => right.board
   }
+
+  private case class SurpriseInProgress(private val surprise: Surprise, private val actions: mutable.Map[Turn, Surprise.Answer] = mutable.Map.empty) {
+
+    def isCompleted = Turn.all forall actions.isDefinedAt
+
+    def apply(outcome: (Turn, Surprise.Answer)): Option[(CompleteSurprise, CompleteSurprise)] = {
+      actions += outcome
+      if (isCompleted) {
+        Some {
+          surprise.handle(
+            left.board -> actions(Turn.Left),
+            right.board -> actions(Turn.Right))
+        }
+      } else None
+    }
+  }
 }
 
 case class Player(actor: ActorRef, board: Board)
 
-case class SurpriseInProgress(private val surprise: Surprise, private val actions: mutable.Map[Turn, Surprise.Answer] = mutable.Map.empty) {
 
-  def isCompleted = Turn.all forall actions.isDefinedAt
-
-  def apply(outcome: (Turn, Surprise.Answer)): Option[(CompleteSurprise, CompleteSurprise)] = {
-    actions += outcome
-    if (isCompleted) {
-      Some(surprise.handle(actions(Turn.Left), actions(Turn.Right)))
-    } else None
-  }
-}
 
 object GameActor {
 

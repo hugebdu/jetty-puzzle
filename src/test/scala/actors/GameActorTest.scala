@@ -56,7 +56,7 @@ class GameActorTest extends ActorSpec {
 
     "complete the surprise on both answers" in new ctx with startedGame with surprised {
 
-      surprise.handle(Surprise.Drop, Surprise.Pick) returns ((CompleteSurprise(Seq(1 -> 2)), CompleteSurprise(Seq(3 -> 4))))
+      surprise.handle(leftBoard -> Surprise.Drop, rightBoard -> Surprise.Pick) returns ((CompleteSurprise(Seq(1 -> 2)), CompleteSurprise(Seq(3 -> 4))))
 
       game ! DroppedSurprise(Turn.Left)
       game ! PickedSurprise(Turn.Right)

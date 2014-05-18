@@ -1,6 +1,6 @@
 package model
 
-import model.Surprise.{Answer, Challenge}
+import model.Surprise.{Drop, Pick, Answer, Challenge}
 import actors.GameActor.CompleteSurprise
 
 /**
@@ -23,34 +23,47 @@ object DefaultSurpriseProducer extends SurpriseProducer {
 trait Surprise {
 
   def challenge(): Challenge = Challenge(kind)
-  def handle(outcomes: (Answer, Answer)): (CompleteSurprise, CompleteSurprise)
+  def handle(outcomes: ((Board, Answer), (Board, Answer))): (CompleteSurprise, CompleteSurprise)
   def isEligible(boards: (Board, Board)): Boolean
 
   protected def kind: String
 }
 
-case class PrisonersDilemma(config: PrisonersDilemma.Config = PrisonersDilemma.Config()) extends Surprise {
+class PrisonersDilemma(config: PrisonersDilemma.Config = PrisonersDilemma.Config()) extends Surprise { this: Tossing =>
 
   def isEligible(boards: (Board, Board)): Boolean = {
-    ???
+    Seq(boards._1.percentCompleted, boards._2.percentCompleted) exists { _ >= config.eligibilityThreshold }
   }
 
-  def handle(outcomes: (Answer, Answer)): (CompleteSurprise, CompleteSurprise) = {
-    ???
+  def handle(outcomes: ((Board, Answer), (Board, Answer))): (CompleteSurprise, CompleteSurprise) = {
+    import config._
+    outcomes match {
+      case ((b1, Pick), (b2, Pick)) => (CompleteSurprise(toss(b1, cooperation)), CompleteSurprise(toss(b2, cooperation)))
+      case ((b1, Drop), (b2, Drop)) => (CompleteSurprise(toss(b1, defection)), CompleteSurprise(toss(b2, defection)))
+      case ((b1, Pick), (b2, Drop)) => (CompleteSurprise(toss(b1, cooperationVsDefection._1)), CompleteSurprise(toss(b2, cooperationVsDefection._2)))
+      case ((b1, Drop), (b2, Pick)) => (CompleteSurprise(toss(b1, cooperationVsDefection._2)), CompleteSurprise(toss(b2, cooperationVsDefection._1)))
+    }
   }
 
   protected val kind = "prisoners"
 }
 
 object PrisonersDilemma {
-  case class Config(cooperation: (Int, Int) = (-1, -1), defection: (Int, Int) = (-2, -2), cooperationVsDefection: (Int, Int) = (0, -3))
+  case class Config(cooperation: Int = 1,
+                    defection: Int = 2,
+                    cooperationVsDefection: (Int, Int) = (0, 3),
+                    eligibilityThreshold: Double = 0.2)
 }
 
-private[model] trait DeterministicTossing {
+private[model] trait Tossing {
+  def toss(board: Board, count: Int): Seq[(Int, Int)]
+}
+
+private[model] trait DeterministicTossing extends Tossing {
 
   private val gainFunc: ((Int, (Position, Position))) => Int = _._1
 
-  def toss(board: Board, count: Int): Seq[(Position, Position)] = {
+  def toss(board: Board, count: Int): Seq[(Int, Int)] = {
 
     if (count == 0) Nil else {
 
@@ -65,7 +78,7 @@ private[model] trait DeterministicTossing {
       }.toSeq.sortBy(gainFunc).takeRight(count) map { case (_, p) => p }
 
       swaps foreach board.swap
-      swaps
+      swaps map { case (p1, p2) => (p1.index, p2.index) }
     }
   }
 }

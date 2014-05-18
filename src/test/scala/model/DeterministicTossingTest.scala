@@ -26,7 +26,7 @@ class DeterministicTossingTest extends SpecificationWithJUnit {
     "handle simple case - unshuffled board, 1 piece" in new ctx {
       val board = Board.create()
 
-      toss(board, 1) must be_===(Seq(Position(2) -> Position(6)))
+      toss(board, 1) must be_===(Seq(2 -> 6))
 
       board.cells(2) must be_===(Piece(6))
       board.cells(6) must be_===(Piece(2))
@@ -36,8 +36,8 @@ class DeterministicTossingTest extends SpecificationWithJUnit {
       val board = Board.create()
 
       toss(board, 2) must contain(exactly(
-        (Position(2), Position(6)),
-        (Position(0), Position(8))))
+        (2, 6),
+        (0, 8)))
 
       board.cells(2) must be_===(Piece(6))
       board.cells(6) must be_===(Piece(2))
