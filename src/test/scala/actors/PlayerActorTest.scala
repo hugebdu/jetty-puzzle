@@ -45,6 +45,17 @@ class PlayerActorTest extends ActorSpec {
     player ! Challenge("prisoner")
   }
 
+  "CompleteSurprise" should {
+
+    "propagate to endpoint" in new ctx with gameInitialized with challenged {
+      player ! CompleteSurprise(Seq(1 -> 2, 3 -> 4))
+
+      got {
+        one(endpoint) ! Messages.ChallengeFinished(Seq(1 -> 2, 3 -> 4))
+      }
+    }
+  }
+
   "ChallengeOutcome" should {
 
     "propagate picked to game" in new ctx with gameInitialized with challenged {
@@ -84,10 +95,10 @@ class PlayerActorTest extends ActorSpec {
   "Swap" should {
 
     "propagate to client" in new ctx with gameInitialized {
-      player ! Swap(1 -> 2)
+      player ! Swap(Seq(1 -> 2))
 
       got {
-        one(endpoint) ! Messages.Swap(1 -> 2)
+        one(endpoint) ! Messages.Swap(Seq(1 -> 2))
       }
     }
   }

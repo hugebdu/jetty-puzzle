@@ -1,6 +1,7 @@
 package model
 
-import model.Surprise.Challenge
+import model.Surprise.{Answer, Challenge}
+import actors.GameActor.{CompleteSurprise, Swap}
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,6 +22,7 @@ object DefaultSurpriseProducer extends SurpriseProducer {
 
 trait Surprise {
   def challenge(): Challenge
+  def handle(outcomes: (Answer, Answer)): (CompleteSurprise, CompleteSurprise)
 }
 
 object Surprise {

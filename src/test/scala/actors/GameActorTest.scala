@@ -27,6 +27,9 @@ class GameActorTest extends ActorSpec {
     val rightBoard = mock[Board]
     
     val surprises = mock[SurpriseProducer]
+    val surprise = mock[Surprise]
+
+    surprise.challenge() returns Challenge("prisoner")
 
     val game = TestActorRef(new GameActor(surprises))
 
@@ -40,6 +43,27 @@ class GameActorTest extends ActorSpec {
     givenGameStarted
     leftPlayer.expectMsgType[StartGame]
     rightPlayer.expectMsgType[StartGame]
+  }
+
+  trait surprised extends ctx {
+    surprises.maybeSurprise(leftBoard -> rightBoard) returns Some(surprise)
+    game ! CheckForSurprises
+    leftPlayer.expectMsgType[Challenge]
+    rightPlayer.expectMsgType[Challenge]
+  }
+
+  "PickedSurprise/DroppedSurprise" should {
+
+    "complete the surprise on both answers" in new ctx with startedGame with surprised {
+
+      surprise.handle(Surprise.Drop, Surprise.Pick) returns ((CompleteSurprise(Seq(1 -> 2)), CompleteSurprise(Seq(3 -> 4))))
+
+      game ! DroppedSurprise(Turn.Left)
+      game ! PickedSurprise(Turn.Right)
+
+      leftPlayer.expectMsg(CompleteSurprise(Seq(1 -> 2)))
+      rightPlayer.expectMsg(CompleteSurprise(Seq(3 -> 4)))
+    }
   }
 
   "Init" should {
@@ -58,7 +82,7 @@ class GameActorTest extends ActorSpec {
   "CheckForSurprises" should {
 
     "on surprise - send ask to pairs" in new startedGame {
-      surprises.maybeSurprise(leftBoard -> rightBoard) returns Some(DummySurprise)
+      surprises.maybeSurprise(leftBoard -> rightBoard) returns Some(surprise)
       game ! CheckForSurprises
 
       leftPlayer.expectMsg(Challenge("prisoner"))
@@ -66,7 +90,7 @@ class GameActorTest extends ActorSpec {
     }
 
     "on surprise - ignore clicks" in new startedGame {
-      surprises.maybeSurprise(leftBoard -> rightBoard) returns Some(DummySurprise)
+      surprises.maybeSurprise(leftBoard -> rightBoard) returns Some(surprise)
       leftBoard.click(14) returns None
 
       game ! CheckForSurprises
@@ -100,7 +124,7 @@ class GameActorTest extends ActorSpec {
 
       game ! Click(Turn.Left, 14)
 
-      expectMsg(Swap(14 -> 13))
+      expectMsg(Swap(Seq(14 -> 13)))
     }
 
     "send GameOver to both upon finish and terminate" in new startedGame {
@@ -117,8 +141,4 @@ class GameActorTest extends ActorSpec {
       termination.expectTerminated(game)
     }
   }
-}
-
-case object DummySurprise extends Surprise {
-  def challenge() = Challenge("prisoner")
 }

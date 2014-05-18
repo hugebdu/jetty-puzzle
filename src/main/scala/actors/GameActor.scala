@@ -3,6 +3,7 @@ package actors
 import akka.actor.{ActorRef, Actor}
 import model._
 import collection.mutable
+import actors.GameActor.CompleteSurprise
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,8 +18,18 @@ class GameActor(surprises: SurpriseProducer) extends Actor {
   var left: Player = _
   var right: Player = _
   var surprise: SurpriseInProgress = _
+  
+  def completeSurprise(swaps: (CompleteSurprise, CompleteSurprise)): Unit = {
+    left.actor ! swaps._1
+    right.actor ! swaps._2
+    surprise = null
+    become(playing)
+  }
 
-  def surprised: Receive = Map.empty
+  def surprised: Receive = {
+    case PickedSurprise(turn) => surprise(turn -> Surprise.Pick) foreach completeSurprise
+    case DroppedSurprise(turn) => surprise(turn -> Surprise.Drop) foreach completeSurprise
+  }
 
   def playing: Receive = {
 
@@ -37,7 +48,7 @@ class GameActor(surprises: SurpriseProducer) extends Actor {
           left.actor ! GameFinished(turn)
           right.actor ! GameFinished(turn)
           stop(self)
-        } else sender ! Swap(x)
+        } else sender ! Swap(Seq(x))
       }
   }
 
@@ -58,8 +69,16 @@ class GameActor(surprises: SurpriseProducer) extends Actor {
 
 case class Player(actor: ActorRef, board: Board)
 
-case class SurpriseInProgress(surprise: Surprise, actions: mutable.Map[Turn, Surprise.Answer] = mutable.Map.empty) {
+case class SurpriseInProgress(private val surprise: Surprise, private val actions: mutable.Map[Turn, Surprise.Answer] = mutable.Map.empty) {
+
   def isCompleted = Turn.all forall actions.isDefinedAt
+
+  def apply(outcome: (Turn, Surprise.Answer)): Option[(CompleteSurprise, CompleteSurprise)] = {
+    actions += outcome
+    if (isCompleted) {
+      Some(surprise.handle(actions(Turn.Left), actions(Turn.Right)))
+    } else None
+  }
 }
 
 object GameActor {
@@ -68,12 +87,12 @@ object GameActor {
   case class StartGame(turn: Turn, shuffle: Seq[Cell])
   case class Click(turn: Turn, index: Int)
   case object InvalidMove
-  case class Swap(indexes: (Int, Int))
+  case class Swap(indexes: Seq[(Int, Int)])
+  case class CompleteSurprise(swaps: Seq[(Int, Int)])
   case class GameFinished(winner: Turn)
   case object CheckForSurprises
 
   sealed trait SurpriseAction { def turn: Turn }
   case class PickedSurprise(turn: Turn)
   case class DroppedSurprise(turn: Turn)
-
 }
