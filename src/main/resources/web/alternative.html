@@ -6,14 +6,68 @@
 
     <script type="text/javascript">
 
-        /* How to correctly createa plug in */
+        /* How to correctly create plug in */
 
         $(document).ready(function() {
 
             var zi = 1;
             var EmptySquare = 16;
 
-            var swap = function(aIdx, bIdx) {
+            var consoleHandler = function(msg) {
+                console.info(JSON.stringify(msg));
+            };
+
+            var swapHandler = function(msg) {
+                $.each(msg['indexes'], function(index, value) {
+                    swapPair(value);
+                });
+            };
+
+            var swapPair = function(value) {
+                $.each(value, function(x, y) {
+                    _swapUx(parseInt(x), parseInt(y));
+                });
+            }
+
+            var invalidMoveHandler = function() {
+                alert("Invalid move");
+            };
+
+            var startGameHandler = function(msg) {
+                //TODO: bug on same index swapped multiple times
+                $.each(msg['shuffles'], function(index, value) {
+                    swapPair(value);
+                });
+            };
+
+            var challengeHandler = function(msg) {
+                var sticker = $("#board").children("#sticker").first();
+                sticker.css("top", "800px").text("Hurra").show();
+                //TODO
+            };
+
+            var gameFinishedHandler = function(msg) {
+                alert(msg['winner'] ? "Finished! You're the winner!" : "Finished... No luck this time");
+            };
+
+            var messageHandlers = {};
+
+            messageHandlers['WaitingForPair'] = consoleHandler;         //TODO
+            messageHandlers['InitGame'] = consoleHandler;               //TODO
+            messageHandlers['InvalidMove'] = invalidMoveHandler;
+            messageHandlers['UnknownInvitation'] = consoleHandler;      //TODO
+            messageHandlers['Challenge'] = challengeHandler;
+            messageHandlers['StartGame'] = startGameHandler;
+            messageHandlers['Swap'] = swapHandler;
+            messageHandlers['GameFinished'] = gameFinishedHandler;
+
+            var dispatch = function(json) {
+                var msg = JSON.parse(json);
+                var handler = messageHandlers[msg['type']];
+                handler(msg);
+            };
+
+            var _swapUx = function(aIdx, bIdx) {
                 var a = $("#board").children("#" + aIdx).first();
                 var b = $("#board").children("#" + bIdx).first();
 
@@ -25,6 +79,10 @@
 
                 a.animate({ left: newx, top: newy }, 300);
                 b.animate({ left: oldx, top: oldy }, 300);
+
+                var tmp = a.attr("id")
+                a.attr("id", b.attr("id"))
+                b.attr("id", tmp)
             };
 
             function Move(clicked_square) {
@@ -86,25 +144,32 @@
                     Move(this);
                 });
 
-                $(targetElement).data("swap", swap);
+                $("#board").append($("<h3 id='sticker' style='display: none; position: absolute;'>blah</h3>"));
+
+                $(targetElement).data("swap", _swapUx);
+                $(targetElement).data("dispatch", dispatch);
             }
 
             });
 
             $("#target").fifteen(128); // Create a game with 32x32 squares inside "#target" div
-            var func = $("#target").data('swap');
-            setTimeout(function() { func(1, 8); }, 2000);
 
-
+            $("#send").click(function() {
+                var dispatch = $("#target").data('dispatch');
+                dispatch($("#json").val());
+            });
         });
 
     </script>
 </head>
 <body>
-
 <h1>jQuery Image Block Sliding Game (<i>with source code</i>)</h1>
 
 <div id="target"></div>
+<div style="position: absolute; top: 600px;">
+    <textarea rows="5" cols="80" id="json">{"type":"Challenge", "kind":"chicken"}</textarea>
+    <button id="send">Send</button>
+</div>
 </body>
 </html>
 
