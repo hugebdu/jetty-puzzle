@@ -42,8 +42,38 @@
 
             var challengeHandler = function(msg) {
                 var sticker = $("#board").children("#sticker").first();
-                sticker.css("top", "800px").text("Hurra").show();
-                //TODO
+                var empty = $("#board").children("div:nth-child(" + EmptySquare + ")");
+                var eTop = empty.css("top");
+                var eLeft = empty.css("left");
+                var eWidth = empty.css("width");
+                var eHeight = empty.css("height");
+
+
+                var counter = window.setInterval(function() {
+                    var h5 = sticker.children("h5");
+                    h5.text(parseInt(h5.text()) - 1);
+                }, 1000);
+
+                var timeout = window.setTimeout(function() {
+                    sticker.unbind("click").toggle();
+                    window.clearInterval(counter);
+                    alert("Dropped!");
+                }, msg['timeoutInSeconds'] * 1000);
+
+                sticker.children("h3").text(msg['kind']);
+                sticker.children("h5").text(msg['timeoutInSeconds']);
+
+                sticker.css("top", eTop)
+                        .css("left", eLeft)
+                        .css("width", eWidth)
+                        .css("height", eHeight)
+                        .show()
+                        .click(function() {
+                            window.clearTimeout(timeout);
+                            sticker.unbind("click").toggle();
+                            window.clearInterval(counter);
+                            alert("Picked!");
+                        });
             };
 
             var gameFinishedHandler = function(msg) {
@@ -70,6 +100,8 @@
             var _swapUx = function(aIdx, bIdx) {
                 var a = $("#board").children("#" + aIdx).first();
                 var b = $("#board").children("#" + bIdx).first();
+
+                a.css("z-index", zi++);
 
                 var oldx = a.css("left");
                 var oldy = a.css("top");
@@ -144,7 +176,7 @@
                     Move(this);
                 });
 
-                $("#board").append($("<h3 id='sticker' style='display: none; position: absolute;'>blah</h3>"));
+                $("#board").append($("<div id='sticker' style='display: none; position: absolute; text-align: center; cursor: pointer;'><h3 id='sticker' style='text-transform: capitalize;'>blah</h3><h5>666</h5></div>"));
 
                 $(targetElement).data("swap", _swapUx);
                 $(targetElement).data("dispatch", dispatch);
@@ -167,7 +199,7 @@
 
 <div id="target"></div>
 <div style="position: absolute; top: 600px;">
-    <textarea rows="5" cols="80" id="json">{"type":"Challenge", "kind":"chicken"}</textarea>
+    <textarea rows="5" cols="80" id="json">{"type":"Challenge", "kind":"chicken", "timeoutInSeconds":4}</textarea>
     <button id="send">Send</button>
 </div>
 </body>
