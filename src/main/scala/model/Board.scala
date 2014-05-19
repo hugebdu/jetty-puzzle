@@ -26,6 +26,13 @@ case class Board(cells: mutable.IndexedSeq[Cell]) {
     cells.zipWithIndex map { case (cell, index) => (cell, Position(index)) }
   }
 
+  def shuffles: Seq[(Int, Int)] = {
+    (cellsWithPosition collect {
+      case (cell, position) if cell.place != position =>
+        math.min(cell.place.index, position.index) -> math.max(cell.place.index, position.index)
+    }).distinct
+  }
+
   def click(position: Position): Option[(Int, Int)] = {
     if (cells(position) == Empty) None else {
       val positionOfEmptyOpt = findEmptyAround(position)

@@ -23,18 +23,29 @@ trait JsonSupport {
     Extraction.decompose(msg)
   }
 
+  def asMessage(json: JValue): Option[Message] = {
+    json.extractOpt[Message]
+  }
+
   def asMessage(s: String): Option[Message] = {
-    Try {
-      Serialization.read[Message](s)
-    }.toOption
+    Try { Serialization.read[Message](s) }.toOption
   }
 }
 
 object JsonSupport extends JsonSupport
 
+private[json] object PairOfIndexesSerializer extends CustomSerializer[(Int, Int)](format => ({
+    case JObject(List(JField(leftAsString, JString(rightAsString)))) => (leftAsString.toInt, rightAsString.toInt)
+  },
+  {
+    case (left: Int, right: Int) => JObject(JField(left.toString, JString(right.toString)))
+  })
+)
+
 private[json] object MessagesFormats extends DefaultFormats {
   override val typeHints: TypeHints = MessagesTypeHints
   override val typeHintFieldName: String = "type"
+  override val customSerializers: List[Serializer[_]] = PairOfIndexesSerializer :: Nil
 }
 
 private[json] object MessagesTypeHints extends TypeHints {

@@ -16,6 +16,26 @@ class BoardTest extends SpecificationWithJUnit {
     lazy val board = Board.create()
   }
 
+  "shuffles" should {
+
+    "be empty for completed board" in new ctx {
+      board.shuffles must beEmpty
+    }
+
+    "be a seq of shuffles" in new ctx {
+      board.swap(Position(0, 0) -> Position(0, size.value - 1))
+      board.swap(Position(1, 1) -> Position(1, 2))
+
+      board.shuffles must not(beEmpty)
+
+      board.shuffles foreach {
+        case (x, y) => board.swap(Position(x), Position(y))
+      }
+
+      board.isCompleted must beTrue
+    }
+  }
+
   "size" should {
 
     "be correct" in new ctx {

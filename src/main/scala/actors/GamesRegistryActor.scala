@@ -56,7 +56,9 @@ trait BoardConstruction {
   implicit val size = Size(4)
 
   def createBoard(): Board = {
-    Board.create()
+    val b = Board.create()
+    b.shuffle()
+    b
   }
 }
 

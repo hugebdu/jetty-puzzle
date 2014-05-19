@@ -2,9 +2,7 @@ package actors
 
 import akka.testkit._
 import model._
-import collection.mutable
 import model.Size
-import model.Piece
 import GameActor._
 import model.Surprise.Challenge
 
@@ -69,13 +67,13 @@ class GameActorTest extends ActorSpec {
   "Init" should {
 
     "initialize state and send StartGame to pairs" in new ctx {
-      leftBoard.cells returns mutable.IndexedSeq(Piece(1))
-      rightBoard.cells returns mutable.IndexedSeq(Piece(2))
+      leftBoard.shuffles returns Seq(0 -> 1)
+      rightBoard.shuffles returns Seq(2 -> 3)
 
       game ! Init(Player(leftPlayer.ref, leftBoard), Player(rightPlayer.ref, rightBoard))
 
-      leftPlayer.expectMsg(StartGame(Turn.Left, Seq(Piece(1))))
-      rightPlayer.expectMsg(StartGame(Turn.Right, Seq(Piece(2))))
+      leftPlayer.expectMsg(StartGame(Seq(0 -> 1)))
+      rightPlayer.expectMsg(StartGame(Seq(2 -> 3)))
     }
   }
   

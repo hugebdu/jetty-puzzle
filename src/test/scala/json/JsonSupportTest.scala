@@ -1,7 +1,7 @@
 package json
 
 import org.specs2.mutable.SpecificationWithJUnit
-import actors.Messages.{InvalidMove, Click}
+import actors.Messages.{Swap, InvalidMove, Click}
 import JsonSupport._
 
 /**
@@ -10,6 +10,26 @@ import JsonSupport._
  * Date: 5/17/14
  */
 class JsonSupportTest extends SpecificationWithJUnit {
+
+  "asMessage(json)" should {
+
+    "build POJO" >> {
+      import org.json4s.JsonDSL._
+      val json = ("type" -> "Click") ~ ("index" -> 25)
+      asMessage(json) must beSome(Click(25))
+    }
+  }
+
+  "Swap" should {
+
+    "serialize" >> {
+      Swap(Seq(0 -> 1, 2 -> 3)).toJSONString === """{"type":"Swap","indexes":[{"0":"1"},{"2":"3"}]}"""
+    }
+
+    "deserialize" >> {
+      asMessage("""{"type":"Swap","indexes":[{"0":"1"},{"2":"3"}]}""") must beSome(Swap(Seq(0 -> 1, 2 -> 3)))
+    }
+  }
 
   "InvalidMove message" should {
 

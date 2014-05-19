@@ -11,11 +11,13 @@ import org.eclipse.jetty.websocket.api.{Session, WebSocketAdapter}
 import akka.actor.{Props, ActorRef, ActorSystem}
 import actors.{GamesRegistryActor, Endpoint, PlayerActor}
 import actors.GamesRegistryActor.Join
+import model.Id
 
 class PuzzleServer extends Server {
+
   implicit val system = ActorSystem()
 
-  val gamesRegistry = system.actorOf(Props[GamesRegistryActor])
+  val gamesRegistry = system.actorOf(Props[GamesRegistryActor], "games-registry")
 
   val connector = new ServerConnector(this)
   connector.setPort(8080)
@@ -39,8 +41,7 @@ class PuzzleServer extends Server {
 
     override def onWebSocketConnect(session: Session) {
       super.onWebSocketConnect(session)
-      println(gameId)
-      actor = system.actorOf(Props(new PlayerActor(Endpoint(session.getRemote))))
+      actor = system.actorOf(Props(new PlayerActor(Endpoint(session.getRemote))), s"player-${Id.random()}")
       gamesRegistry ! Join(gameId, actor)
     }
 
@@ -54,7 +55,6 @@ class PuzzleServer extends Server {
     }
 
     override def onWebSocketError(cause: Throwable) {
-      super.onWebSocketError(cause)
       cause.printStackTrace(System.err)
     }
   }

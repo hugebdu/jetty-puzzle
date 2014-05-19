@@ -30,11 +30,15 @@ class PlayerActor(endpoint: Endpoint) extends Actor with JsonSupport {
 
   def playing: Receive = {
 
+    case StartGame(shuffle) => endpoint ! Messages.StartGame(shuffle)
+
     case JsonMessage(Messages.Click(index)) => game.actor ! Click(game.turn, index)
 
     case GameFinished(winner) => endpoint ! Messages.GameFinished(winner == game.turn)
 
     case Swap(pieces) => endpoint ! Messages.Swap(pieces)
+
+    case InvalidMove => endpoint ! Messages.InvalidMove()
 
     case Challenge(kind) =>
       endpoint ! Messages.Challenge(kind, PlayerActor.ChallengeTimeoutInSeconds)
@@ -98,6 +102,7 @@ object Messages {
     classOf[Challenge],
     classOf[ChallengeOutcome],
     classOf[ChallengeFinished],
+    classOf[StartGame],
     classOf[Swap],
     classOf[GameFinished]
   )
@@ -110,6 +115,7 @@ object Messages {
   case class UnknownInvitation() extends Message
   case class GameFinished(winner: Boolean) extends Message
   case class Swap(indexes: Seq[(Int, Int)]) extends Message
+  case class StartGame(shuffles: Seq[(Int, Int)]) extends Message
   case class ChallengeFinished(indexes: Seq[(Int, Int)]) extends Message
   case class Challenge(kind: String, timeoutInSeconds: Int) extends Message
   case class ChallengeOutcome(picked: Boolean) extends Message

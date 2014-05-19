@@ -55,8 +55,8 @@ class GameActor(surprises: SurpriseProducer) extends Actor {
 
     case Init(l, r) =>
       left = l; right = r
-      left.actor ! StartGame(Turn.Left, left.board.cells)
-      right.actor ! StartGame(Turn.Right, right.board.cells)
+      left.actor ! StartGame(left.board.shuffles)
+      right.actor ! StartGame(right.board.shuffles)
       become(playing)
   }
 
@@ -84,12 +84,10 @@ class GameActor(surprises: SurpriseProducer) extends Actor {
 
 case class Player(actor: ActorRef, board: Board)
 
-
-
 object GameActor {
 
   case class Init(left: Player, right: Player)
-  case class StartGame(turn: Turn, shuffle: Seq[Cell])
+  case class StartGame(shuffle: Seq[(Int, Int)])
   case class Click(turn: Turn, index: Int)
   case object InvalidMove
   case class Swap(indexes: Seq[(Int, Int)])

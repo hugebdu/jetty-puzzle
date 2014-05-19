@@ -45,6 +45,28 @@ class PlayerActorTest extends ActorSpec {
     player ! Challenge("prisoner")
   }
 
+  "StartGame" should {
+
+    "propagate to endpoint" in new ctx with gameInitialized {
+      player ! StartGame(Seq(1 -> 2))
+
+      got {
+        one(endpoint) ! Messages.StartGame(Seq(1 -> 2))
+      }
+    }
+  }
+
+  "InvalidMove" should {
+
+    "propagate to endpoint" in new ctx with gameInitialized {
+      player ! InvalidMove
+
+      got {
+        one(endpoint) ! Messages.InvalidMove()
+      }
+    }
+  }
+
   "CompleteSurprise" should {
 
     "propagate to endpoint" in new ctx with gameInitialized with challenged {
