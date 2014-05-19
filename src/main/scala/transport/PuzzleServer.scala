@@ -3,19 +3,25 @@ package transport
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.handler.ResourceHandler
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.eclipse.jetty.servlet.ServletHolder
+import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.util.resource.Resource
 import org.eclipse.jetty.websocket.servlet._
 import org.eclipse.jetty.websocket.api.{Session, WebSocketAdapter}
 import akka.actor.{Props, ActorRef, ActorSystem}
 import actors.{GamesRegistryActor, Endpoint, PlayerActor}
-import actors.GamesRegistryActor.Join
+import actors.GamesRegistryActor.{CreateInvitation, Join}
 import model.Id
+import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
+import akka.pattern.ask
+import concurrent.Await
+import concurrent.duration._
+import akka.util.Timeout
+
 
 class PuzzleServer extends Server {
 
   implicit val system = ActorSystem()
+  implicit val timeout = Timeout(1.second)
 
   val gamesRegistry = system.actorOf(Props[GamesRegistryActor], "games-registry")
 
@@ -27,13 +33,21 @@ class PuzzleServer extends Server {
   context.setContextPath("/")
   setHandler(context)
 
-  val holderEvents = new ServletHolder("ws-events", new PuzzleServlet)
-  context.addServlet(holderEvents, "/ws/game/*")
+  context.addServlet(new ServletHolder("ws-events", new PuzzleServlet), "/ws/game/*")
+  context.addServlet(new ServletHolder(new InvitationsServlet), "/games")
 
   val handler = new ResourceHandler
   handler.setBaseResource(Resource.newClassPathResource("web"))
   handler.setDirectoriesListed(true)
   context.setHandler(handler)
+
+  class InvitationsServlet extends DefaultServlet {
+
+    override def doPost(request: HttpServletRequest, response: HttpServletResponse): Unit = {
+      val id = Await.result((gamesRegistry ? CreateInvitation("image.gif")).mapTo[String], 1.second)
+      response.sendRedirect(s"game.html?id=$id")
+    }
+  }
 
   class PuzzleSocket(gameId: String) extends WebSocketAdapter {
 
