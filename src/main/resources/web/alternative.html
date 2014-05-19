@@ -8,6 +8,11 @@
 
         /* How to correctly create plug in */
 
+        var connection = {}; //TODO: websocket here
+        connection['send'] = function(msg) {
+            console.info("Sending message: " + JSON.stringify(msg));
+        };
+
         $(document).ready(function() {
 
             var zi = 1;
@@ -55,9 +60,10 @@
                 }, 1000);
 
                 var timeout = window.setTimeout(function() {
-                    sticker.unbind("click").toggle();
                     window.clearInterval(counter);
-                    alert("Dropped!");
+                    window.clearTimeout(timeout);
+                    sticker.unbind("click").toggle();
+                    connection.send({"type":"ChallengeOutcome", "picked":false});
                 }, msg['timeoutInSeconds'] * 1000);
 
                 sticker.children("h3").text(msg['kind']);
@@ -70,9 +76,9 @@
                         .show()
                         .click(function() {
                             window.clearTimeout(timeout);
-                            sticker.unbind("click").toggle();
                             window.clearInterval(counter);
-                            alert("Picked!");
+                            connection.send({"type":"ChallengeOutcome", "picked":true});
+                            sticker.unbind("click").toggle();
                         });
             };
 
@@ -117,45 +123,9 @@
                 b.attr("id", tmp)
             };
 
-            function Move(clicked_square) {
-                // Locate movable tiles based on where the empty spot is, we can only move the four surrounding squares
-                var movable = false;
-
-                // Swap x/y between the clicked square and the currently empty square
-                var oldx = $("#board").children("div:nth-child(" + EmptySquare + ")").css("left");
-                var oldy = $("#board").children("div:nth-child(" + EmptySquare + ")").css("top");
-                var newx = $(clicked_square).css("left");
-                var newy = $(clicked_square).css("top");
-
-                alert($(clicked_square).attr("id"));
-
-                // The clicked square is north of the empty square
-                if (oldx == newx && newy == (parseInt(oldy) - 128) + 'px')
-                    movable = true;
-
-                // The clicked square is south of the empty square
-                if (oldx == newx && newy == (parseInt(oldy) + 128) + 'px')
-                    movable = true;
-
-                // The clicked square is west of the empty square
-                if ((parseInt(oldx) - 128) + 'px' == newx && newy == oldy)
-                    movable = true;
-
-                // The clicked square is east of the empty square
-                if ((parseInt(oldx) + 128) + 'px' == newx && newy == oldy)
-                    movable = true;
-
-                if (movable) {
-                    // Increment zindex so the new tile is always on top of all others
-                    $(clicked_square).css("z-index", zi++);
-
-                    // Swap squares... Animate new square into old square position
-                    $(clicked_square).animate({ left: oldx, top: oldy }, 200, function () {
-                        //Move old square into new square position
-                        $("#board").children("div:nth-child(" + EmptySquare + ")").css("left", newx);
-                        $("#board").children("div:nth-child(" + EmptySquare + ")").css("top", newy);
-                    });
-                }
+            function clickCell(elem) {
+                var index = parseInt($(elem).attr("id"));
+                connection.send({"type":"Click","index":index});
             }
 
             $.fn.extend({ fifteen: function (square_size) {
@@ -165,7 +135,7 @@
                 $("#board").css({ position: 'absolute', width: boardSize, height: boardSize, border: '1px solid gray' });
                 // Populate the game board's HTML container with 15 squares
                 for (var i = 0; i < 16; i++) {
-                    var cell = $("<div style = 'position: absolute; left: " + ((i % 4) * square_size) + "px; top: " + Math.floor(i / 4) * square_size + "px; width: " + square_size + "px; height: " + square_size + "px; text-align: center; line-height: 128px; -moz-box-shadow: inset 0 0 20px #555555; -webkit-box-shadow: inset 0 0 20px #555555; box-shadow: inset 0 0 20px #555555; background: #ffffff url(images/monalisa.png) " + (-(i % 4) * square_size) + "px " + -Math.floor(i / 4) * square_size + "px no-repeat !important'></div>");
+                    var cell = $("<div style = 'position: absolute; left: " + ((i % 4) * square_size) + "px; top: " + Math.floor(i / 4) * square_size + "px; width: " + square_size + "px; height: " + square_size + "px; text-align: center; line-height: 128px; -moz-box-shadow: inset 0 0 20px #555555; -webkit-box-shadow: inset 0 0 20px #555555; box-shadow: inset 0 0 20px #555555; background: #ffffff url(images/lena.jpg) " + (-(i % 4) * square_size) + "px " + -Math.floor(i / 4) * square_size + "px no-repeat !important'></div>");
                     var x = $("#board").append(cell);
                     cell.attr("id", i);
                 }
@@ -173,7 +143,7 @@
                 $("#board").children("div:nth-child(" + EmptySquare + ")").css({backgroundImage: "", background: "#ffffff"});
                 // Attach click event to each square
                 $("#board").children("div").click(function () {
-                    Move(this);
+                    clickCell(this);
                 });
 
                 $("#board").append($("<div id='sticker' style='display: none; position: absolute; text-align: center; cursor: pointer;'><h3 id='sticker' style='text-transform: capitalize;'>blah</h3><h5>666</h5></div>"));
@@ -190,6 +160,11 @@
                 var dispatch = $("#target").data('dispatch');
                 dispatch($("#json").val());
             });
+
+            $("#samples").children("li")
+                    .click(function() {
+                        $("#json").val($(this).text());
+                    });
         });
 
     </script>
@@ -201,6 +176,12 @@
 <div style="position: absolute; top: 600px;">
     <textarea rows="5" cols="80" id="json">{"type":"Challenge", "kind":"chicken", "timeoutInSeconds":4}</textarea>
     <button id="send">Send</button>
+    <ul id="samples">
+        <li>{"type":"Challenge", "kind":"chicken", "timeoutInSeconds":4}</li>
+        <li>{"type":"Swap", "indexes":[{"0":"1"}]}</li>
+        <li>{"type":"InvalidMove"}</li>
+        <li>{"type":"StartGame", "shuffles":[{"0":"5"},{"8":"13"}]}</li>
+    </ul>
 </div>
 </body>
 </html>
