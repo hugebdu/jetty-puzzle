@@ -40,8 +40,11 @@
 
             var startGameHandler = function(msg) {
                 //TODO: bug on same index swapped multiple times
-                $.each(msg['shuffles'], function(index, value) {
-                    swapPair(value);
+                $("#waiting").fadeTo(500, 0, function() {
+                    $(this).toggle();
+                    $.each(msg['shuffles'], function(index, value) {
+                        swapPair(value);
+                    });
                 });
             };
 
@@ -86,9 +89,13 @@
                 alert(msg['winner'] ? "Finished! You're the winner!" : "Finished... No luck this time");
             };
 
+            var waitingForPairHandler = function() {
+                $("#waiting").toggle().fadeTo(500, 0.8);
+            };
+
             var messageHandlers = {};
 
-            messageHandlers['WaitingForPair'] = consoleHandler;         //TODO
+            messageHandlers['WaitingForPair'] = waitingForPairHandler;
             messageHandlers['InitGame'] = consoleHandler;               //TODO
             messageHandlers['InvalidMove'] = invalidMoveHandler;
             messageHandlers['UnknownInvitation'] = consoleHandler;      //TODO
@@ -147,6 +154,12 @@
                 });
 
                 $("#board").append($("<div id='sticker' style='display: none; position: absolute; text-align: center; cursor: pointer;'><h3 id='sticker' style='text-transform: capitalize;'>blah</h3><h5>666</h5></div>"));
+                $("#board").append($('<div id="waiting" style="display: none; position: absolute; background-color: darkolivegreen; text-align: center; opacity: 0;"><h2 style="margin-top: 200px;">Waiting for other player...</h2></div>'));
+
+                $("#waiting").css("top", $("#board").css("top"))
+                        .css("left", $("#board").css("left"))
+                        .css("width", $("#board").css("width"))
+                        .css("height", $("#board").css("height"));
 
                 $(targetElement).data("swap", _swapUx);
                 $(targetElement).data("dispatch", dispatch);
@@ -165,21 +178,26 @@
                     .click(function() {
                         $("#json").val($(this).text());
                     });
+
+            $("#debugging").click(function() {
+                $(this).fadeTo(500, 1);
+            });
         });
 
     </script>
 </head>
 <body>
-<h1>jQuery Image Block Sliding Game (<i>with source code</i>)</h1>
+<h1>Puzzle on Steroids</h1>
 
 <div id="target"></div>
-<div style="position: absolute; top: 600px;">
+<div id="debugging" style="position: absolute; top: 600px; opacity: 0;">
     <textarea rows="5" cols="80" id="json">{"type":"Challenge", "kind":"chicken", "timeoutInSeconds":4}</textarea>
     <button id="send">Send</button>
     <ul id="samples">
         <li>{"type":"Challenge", "kind":"chicken", "timeoutInSeconds":4}</li>
         <li>{"type":"Swap", "indexes":[{"0":"1"}]}</li>
         <li>{"type":"InvalidMove"}</li>
+        <li>{"type":"WaitingForPair"}</li>
         <li>{"type":"StartGame", "shuffles":[{"0":"5"},{"8":"13"}]}</li>
     </ul>
 </div>
