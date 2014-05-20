@@ -8,7 +8,7 @@ import org.eclipse.jetty.util.resource.Resource
 import org.eclipse.jetty.websocket.servlet._
 import org.eclipse.jetty.websocket.api.{Session, WebSocketAdapter}
 import akka.actor.{Props, ActorRef, ActorSystem}
-import actors.{GamesRegistryActor, Endpoint, PlayerActor}
+import actors.{SurprisesActor, GamesRegistryActor, Endpoint, PlayerActor}
 import actors.GamesRegistryActor.{CreateInvitation, Join}
 import model.Id
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
@@ -24,6 +24,7 @@ class PuzzleServer extends Server {
   implicit val timeout = Timeout(1.second)
 
   val gamesRegistry = system.actorOf(Props[GamesRegistryActor], "games-registry")
+  val surprisesMaker = system.actorOf(Props[SurprisesActor], "surprises-maker")
 
   val connector = new ServerConnector(this)
   connector.setPort(8080)
