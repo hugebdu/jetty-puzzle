@@ -133,6 +133,7 @@ class GameActorTest extends ActorSpec {
 
       game ! Click(Turn.Left, 14)
 
+      expectMsg(Swap(Seq(14 -> 13)))
       leftPlayer.expectMsg(GameFinished(Turn.Left))
       rightPlayer.expectMsg(GameFinished(Turn.Left))
 

@@ -44,6 +44,7 @@ class GameActor(surprises: SurpriseProducer) extends Actor {
       val board = boardFor(turn)
       board.click(index).fold[Unit](sender ! InvalidMove) { x =>
         if (board.isCompleted) {
+          sender ! Swap(Seq(x))
           left.actor ! GameFinished(turn)
           right.actor ! GameFinished(turn)
           stop(self)
