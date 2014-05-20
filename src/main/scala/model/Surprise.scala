@@ -34,21 +34,23 @@ object DefaultSurpriseProducer extends SurpriseProducer {
 trait Surprise {
 
   def challenge(): Challenge = Challenge(kind)
-  def handle(outcomes: ((Board, Answer), (Board, Answer))): (CompleteSurprise, CompleteSurprise)
+  def handle(outcomes: ((Board, Option[Answer]), (Board, Option[Answer]))): Option[(CompleteSurprise, CompleteSurprise)]
   def isEligible(boards: (Board, Board)): Boolean
 
   def kind: String
 }
 
 class BoomSurprise(demolish: Int = 4) extends Surprise { this: Tossing =>
+
   val kind: String = "boom"
+
   def isEligible(boards: (Board, Board)): Boolean = true
 
-  def handle(outcomes: ((Board, Answer), (Board, Answer))): (CompleteSurprise, CompleteSurprise) = outcomes match {
-    case ((_, Drop), (_, Drop)) => (CompleteSurprise(), CompleteSurprise())
-    case ((_, Pick), (board, Drop)) => (CompleteSurprise(), CompleteSurprise(toss(board, demolish)))
-    case ((board, Drop), (_, Pick)) => (CompleteSurprise(toss(board, demolish)), CompleteSurprise())
-    case ((left, Pick), (right, Pick)) => (CompleteSurprise(toss(left, demolish)), CompleteSurprise(toss(right, demolish)))
+  def handle(outcomes: ((Board, Option[Answer]), (Board, Option[Answer]))): Option[(CompleteSurprise, CompleteSurprise)] = outcomes match {
+    case ((_, Some(Drop)), (_, Some(Drop))) => Some(CompleteSurprise(), CompleteSurprise())
+    case ((left, Some(Pick)), (right, Some(Pick))) => Some(CompleteSurprise(toss(left, demolish)), CompleteSurprise(toss(right, demolish)))
+    case ((_, Some(Pick)), (board, _)) => Some(CompleteSurprise(), CompleteSurprise(toss(board, demolish)))
+    case ((board, _), (_, Some(Pick))) => Some(CompleteSurprise(toss(board, demolish)), CompleteSurprise())
   }
 }
 
@@ -58,13 +60,14 @@ class DilemmaSurprise(config: Config = Config(), val kind: String) extends Surpr
     Seq(boards._1.percentCompleted, boards._2.percentCompleted) exists { _ >= config.eligibilityThreshold }
   }
 
-  def handle(outcomes: ((Board, Answer), (Board, Answer))): (CompleteSurprise, CompleteSurprise) = {
+  def handle(outcomes: ((Board, Option[Answer]), (Board, Option[Answer]))): Option[(CompleteSurprise, CompleteSurprise)] = {
     import config._
     outcomes match {
-      case ((b1, Pick), (b2, Pick)) => (CompleteSurprise(toss(b1, cooperation)), CompleteSurprise(toss(b2, cooperation)))
-      case ((b1, Drop), (b2, Drop)) => (CompleteSurprise(toss(b1, defection)), CompleteSurprise(toss(b2, defection)))
-      case ((b1, Pick), (b2, Drop)) => (CompleteSurprise(toss(b1, cooperationVsDefection._1)), CompleteSurprise(toss(b2, cooperationVsDefection._2)))
-      case ((b1, Drop), (b2, Pick)) => (CompleteSurprise(toss(b1, cooperationVsDefection._2)), CompleteSurprise(toss(b2, cooperationVsDefection._1)))
+      case ((b1, Some(Pick)), (b2, Some(Pick))) => Some(CompleteSurprise(toss(b1, cooperation)), CompleteSurprise(toss(b2, cooperation)))
+      case ((b1, Some(Drop)), (b2, Some(Drop))) => Some(CompleteSurprise(toss(b1, defection)), CompleteSurprise(toss(b2, defection)))
+      case ((b1, Some(Pick)), (b2, Some(Drop))) => Some(CompleteSurprise(toss(b1, cooperationVsDefection._1)), CompleteSurprise(toss(b2, cooperationVsDefection._2)))
+      case ((b1, Some(Drop)), (b2, Some(Pick))) => Some(CompleteSurprise(toss(b1, cooperationVsDefection._2)), CompleteSurprise(toss(b2, cooperationVsDefection._1)))
+      case _ => None
     }
   }
 }

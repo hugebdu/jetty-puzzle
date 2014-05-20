@@ -40,8 +40,17 @@ class DilemmaSurpriseTest extends SpecificationWithJUnit with Mockito {
 
   "handle" should {
 
+    "be None on both none" in new ctx {
+      dilemma().handle(leftBoard -> None, rightBoard -> None) must beNone
+    }
+
+    "be None on one answer only" in new ctx {
+      dilemma().handle(leftBoard -> Some(Drop), rightBoard -> None) must beNone
+      dilemma().handle(leftBoard -> None, rightBoard -> Some(Drop)) must beNone
+    }
+
     "handle both defect" in new ctx {
-      dilemma(Config(defection = 2)).handle(leftBoard -> Drop, rightBoard -> Drop) must be_===((CompleteSurprise(Seq(1 -> 2)), CompleteSurprise(Seq(3 -> 4))))
+      dilemma(Config(defection = 2)).handle(leftBoard -> Some(Drop), rightBoard -> Some(Drop)) must beSome((CompleteSurprise(Seq(1 -> 2)), CompleteSurprise(Seq(3 -> 4))))
 
       got {
         one(tossing).toss(leftBoard, 2)
@@ -50,7 +59,7 @@ class DilemmaSurpriseTest extends SpecificationWithJUnit with Mockito {
     }
 
     "handle both cooperate" in new ctx {
-      dilemma(Config(cooperation = 1)).handle(leftBoard -> Pick, rightBoard -> Pick) must be_===((CompleteSurprise(Seq(1 -> 2)), CompleteSurprise(Seq(3 -> 4))))
+      dilemma(Config(cooperation = 1)).handle(leftBoard -> Some(Pick), rightBoard -> Some(Pick)) must beSome((CompleteSurprise(Seq(1 -> 2)), CompleteSurprise(Seq(3 -> 4))))
 
       got {
         one(tossing).toss(leftBoard, 1)
@@ -59,7 +68,7 @@ class DilemmaSurpriseTest extends SpecificationWithJUnit with Mockito {
     }
 
     "handle cooperate/defect" in new ctx {
-      dilemma(Config(cooperationVsDefection = (1, 3))).handle(leftBoard -> Pick, rightBoard -> Drop) must be_===((CompleteSurprise(Seq(1 -> 2)), CompleteSurprise(Seq(3 -> 4))))
+      dilemma(Config(cooperationVsDefection = (1, 3))).handle(leftBoard -> Some(Pick), rightBoard -> Some(Drop)) must beSome((CompleteSurprise(Seq(1 -> 2)), CompleteSurprise(Seq(3 -> 4))))
 
       got {
         one(tossing).toss(leftBoard, 1)

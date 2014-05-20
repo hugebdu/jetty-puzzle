@@ -26,19 +26,27 @@ class BoomSurpriseTest extends SpecificationWithJUnit with Mockito {
   "handle" should {
 
     "do nothing when both dropped" in new ctx {
-      surprise.handle(leftBoard -> Drop, rightBoard -> Drop) === (CompleteSurprise(Nil), CompleteSurprise(Nil))
+      surprise.handle(leftBoard -> Some(Drop), rightBoard -> Some(Drop)) must beSome(CompleteSurprise(Nil), CompleteSurprise(Nil))
     }
 
     "explode for picked player's opponent - 1" in new ctx {
-      surprise.handle(leftBoard -> Pick, rightBoard -> Drop) === (CompleteSurprise(Nil), CompleteSurprise(Seq(1 -> 2)))
+      surprise.handle(leftBoard -> Some(Pick), rightBoard -> Some(Drop)) must beSome(CompleteSurprise(Nil), CompleteSurprise(Seq(1 -> 2)))
     }
 
-    "explode for picked player's opponent - 1" in new ctx {
-      surprise.handle(leftBoard -> Drop, rightBoard -> Pick) === (CompleteSurprise(Seq(1 -> 2)), CompleteSurprise())
+    "explode for picked player's opponent - 2" in new ctx {
+      surprise.handle(leftBoard -> Some(Drop), rightBoard -> Some(Pick)) must beSome(CompleteSurprise(Seq(1 -> 2)), CompleteSurprise())
+    }
+
+    "explode for picked player's opponent - 3" in new ctx {
+      surprise.handle(leftBoard -> Some(Pick), rightBoard -> None) must beSome(CompleteSurprise(Nil), CompleteSurprise(Seq(1 -> 2)))
+    }
+
+    "explode for picked player's opponent - 4" in new ctx {
+      surprise.handle(leftBoard -> None, rightBoard -> Some(Pick)) must beSome(CompleteSurprise(Seq(1 -> 2)), CompleteSurprise())
     }
 
     "explode for both when both picked" in new ctx {
-      surprise.handle(leftBoard -> Pick, rightBoard -> Pick) === (CompleteSurprise(Seq(1 -> 2)), CompleteSurprise(Seq(1 -> 2)))
+      surprise.handle(leftBoard -> Some(Pick), rightBoard -> Some(Pick)) must beSome(CompleteSurprise(Seq(1 -> 2)), CompleteSurprise(Seq(1 -> 2)))
     }
   }
 }

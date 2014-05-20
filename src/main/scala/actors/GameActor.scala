@@ -68,17 +68,11 @@ class GameActor(surprises: SurpriseProducer) extends Actor {
 
   private case class SurpriseInProgress(private val surprise: Surprise, private val actions: mutable.Map[Turn, Surprise.Answer] = mutable.Map.empty) {
 
-    def isCompleted = Turn.all forall actions.isDefinedAt
-
     def apply(outcome: (Turn, Surprise.Answer)): Option[(CompleteSurprise, CompleteSurprise)] = {
       actions += outcome
-      if (isCompleted) {
-        Some {
-          surprise.handle(
-            left.board -> actions(Turn.Left),
-            right.board -> actions(Turn.Right))
-        }
-      } else None
+      surprise.handle(
+        left.board -> actions.get(Turn.Left),
+        right.board -> actions.get(Turn.Right))
     }
   }
 }
