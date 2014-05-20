@@ -28,7 +28,7 @@ class SurprisesActor extends Actor {
   }
 
   private def randomDuration = {
-    (10 + Random.nextInt(8)).seconds
+    (15 + Random.nextInt(15)).seconds
   }
 }
 

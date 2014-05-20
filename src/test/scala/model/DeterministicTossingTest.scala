@@ -2,6 +2,7 @@ package model
 
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.specification.Scope
+import org.specs2.matcher.Matcher
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,6 +13,16 @@ class DeterministicTossingTest extends SpecificationWithJUnit {
 
   trait ctx extends Scope with DeterministicTossing {
     implicit val size = Size(3)
+
+    def notHaveIndexRepetitions: Matcher[Seq[(Int, Int)]] = {
+
+      val check: Seq[(Int, Int)] => Boolean = s => {
+        (s flatMap { case (x, y) => Seq(x, y) }).distinct.length / 2 == s.length
+      }
+
+      val message: Seq[(Int, Int)] => String = s => s"$s has index repetitions"
+      check -> message
+    }
   }
 
   "toss" should {
@@ -43,6 +54,14 @@ class DeterministicTossingTest extends SpecificationWithJUnit {
       board.cells(6) must be_===(Piece(2))
       board.cells(0) must be_===(Empty)
       board.cells(8) must be_===(Piece(0))
+    }
+
+    "do not have repetitions in indexes" in new ctx {
+      val board = Board.create()(Size(4))
+
+      val shuffles = toss(board, 10)
+
+      shuffles must notHaveIndexRepetitions
     }
   }
 }

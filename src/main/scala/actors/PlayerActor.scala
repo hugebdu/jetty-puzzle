@@ -116,7 +116,7 @@ object Messages {
   case class GameFinished(winner: Boolean) extends Message
   case class Swap(indexes: Seq[(Int, Int)]) extends Message
   case class StartGame(shuffles: Seq[(Int, Int)]) extends Message
-  case class ChallengeFinished(indexes: Seq[(Int, Int)]) extends Message
+  case class ChallengeFinished(shuffles: Seq[(Int, Int)]) extends Message
   case class Challenge(kind: String, timeoutInSeconds: Int) extends Message
   case class ChallengeOutcome(picked: Boolean) extends Message
 }

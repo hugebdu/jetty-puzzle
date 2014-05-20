@@ -10,7 +10,7 @@
         /* How to correctly create plug in */
 
         /*var connection = {}; //TODO: websocket here
-        connection['send'] = function(msg) {
+        connection['logAndSend'] = function(msg) {
             console.info("Sending message: " + JSON.stringify(msg));
         };*/
 
@@ -82,7 +82,7 @@
                     window.clearInterval(counter);
                     window.clearTimeout(timeout);
                     sticker.unbind("click").toggle();
-                    connection.send({"type":"ChallengeOutcome", "picked":false});
+                    connection.logAndSend({"type":"ChallengeOutcome", "picked":false});
                 }, msg['timeoutInSeconds'] * 1000);
 
                 sticker.children("h3").text(msg['kind']);
@@ -96,7 +96,7 @@
                         .click(function() {
                             window.clearTimeout(timeout);
                             window.clearInterval(counter);
-                            connection.send({"type":"ChallengeOutcome", "picked":true});
+                            connection.logAndSend({"type":"ChallengeOutcome", "picked":true});
                             sticker.unbind("click").toggle();
                         });
             };
@@ -114,16 +114,23 @@
                 window.location.assign("http://lmgtfy.com/?q=I+got+lost");
             };
 
+            var challengeFinishedHandler = function(msg) {
+                $.each(msg['shuffles'], function(index, obj) {
+                    swapPair(obj)
+                });
+            };
+
             var messageHandlers = {};
 
             messageHandlers['WaitingForPair'] = waitingForPairHandler;
             messageHandlers['InitGame'] = consoleHandler;               //TODO
             messageHandlers['InvalidMove'] = invalidMoveHandler;
-            messageHandlers['UnknownInvitation'] = unknownInvitationHandler;      //TODO
+            messageHandlers['UnknownInvitation'] = unknownInvitationHandler;
             messageHandlers['Challenge'] = challengeHandler;
             messageHandlers['StartGame'] = startGameHandler;
             messageHandlers['Swap'] = swapHandler;
             messageHandlers['GameFinished'] = gameFinishedHandler;
+            messageHandlers['ChallengeFinished'] = challengeFinishedHandler;
 
             var dispatch = function(json) {
                 var msg = JSON.parse(json);
@@ -153,7 +160,7 @@
 
             function clickCell(elem) {
                 var index = parseInt($(elem).attr("id"));
-                connection.send(JSON.stringify({"type":"Click","index":index}));
+                connection.logAndSend({"type":"Click","index":index});
             }
 
             $.fn.extend({ fifteen: function (square_size) {
@@ -204,6 +211,12 @@
 
             connection = new WebSocket('ws://localhost:8080/ws/game/' + $.query.get("id"));
 
+            connection['logAndSend'] = function(msg) {
+                var json = JSON.stringify(msg);
+                console.info("MSG SEND: " + json);
+                connection.send(json);
+            };
+
             connection.onmessage = function(msg) {
                 console.info("MSG RECEIVED: " + msg.data);
                 dispatch(msg.data);
@@ -226,6 +239,7 @@
         <li>{"type":"WaitingForPair"}</li>
         <li>{"type":"UnknownInvitation"}</li>
         <li>{"type":"StartGame", "shuffles":[{"0":"5"},{"8":"13"},{"8":"9"}]}</li>
+        <li>{"type":"ChallengeFinished", "shuffles":[{"0":"5"},{"8":"13"},{"1":"2"}]}</li>
     </ul>
 </div>
 </body>

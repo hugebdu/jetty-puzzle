@@ -70,13 +70,22 @@ private[model] trait DeterministicTossing extends Tossing {
 
       implicit val size = board.size
 
-      val swaps = board.cellsWithPosition.combinations(2).map {
+      val candidates = board.cellsWithPosition.combinations(2).map {
         case Seq((c1, p1), (c2, p2)) =>
           val current = c1.distanceFromPlace(p1) + c2.distanceFromPlace(p2)
           val possible = c1.distanceFromPlace(p2) + c2.distanceFromPlace(p1)
           val gain = possible - current
           gain -> (p1, p2)
-      }.toSeq.sortBy(gainFunc).takeRight(count) map { case (_, p) => p }
+      }.toSeq.sortBy(gainFunc).reverse.map {
+        case (_, p @ (from, to)) if from.index > to.index => p.swap
+        case (_, p) => p
+      }
+
+      val (_, swaps) = candidates.foldLeft[(Set[Position], List[(Position, Position)])](Set.empty[Position] -> Nil) {
+        case (s @ (_, picked), _) if picked.length == count => s
+        case (s @ (set, _), (from, to)) if set.contains(from) || set.contains(to) => s
+        case (s @ (set, picked), p @ (from, to)) => set + (from, to) -> (p :: picked)
+      }
 
       swaps foreach board.swap
       swaps map { case (p1, p2) => (p1.index, p2.index) }
