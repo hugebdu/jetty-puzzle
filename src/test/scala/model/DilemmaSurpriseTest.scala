@@ -5,6 +5,8 @@ import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
 import model.Surprise.{Config, Pick, Drop}
 import actors.GameActor.CompleteSurprise
+import org.specs2.mock.mockito.MocksCreation
+import org.specs2.matcher.ThrownExpectations
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,7 +15,7 @@ import actors.GameActor.CompleteSurprise
  */
 class DilemmaSurpriseTest extends SpecificationWithJUnit with Mockito {
 
-  trait ctx extends Scope {
+  trait ctx extends Scope with TossingTestSupport with ThrownExpectations {
 
     implicit val size = Size(3)
 
@@ -26,18 +28,10 @@ class DilemmaSurpriseTest extends SpecificationWithJUnit with Mockito {
     val leftTossing = Seq(1 -> 2)
     val rightTossing = Seq(3 -> 4)
 
-    val tossing = mock[Tossing]
-
     tossing.toss(any, any) answers { (args, _) =>
       args.asInstanceOf[Array[Any]].apply(0) match {
         case `leftBoard` => leftTossing
         case `rightBoard` => rightTossing
-      }
-    }
-
-    trait MockedTossing extends Tossing {
-      def toss(board: Board, count: Int): Seq[(Int, Int)] = {
-        tossing.toss(board, count)
       }
     }
 
@@ -86,6 +80,17 @@ class DilemmaSurpriseTest extends SpecificationWithJUnit with Mockito {
       leftBoard.percentCompleted returns 0.21
       rightBoard.percentCompleted returns 0.1
       dilemma(Config(eligibilityThreshold = 0.24)).isEligible(leftBoard, rightBoard) must beFalse
+    }
+  }
+}
+
+trait TossingTestSupport extends MocksCreation {
+
+  val tossing = mock[Tossing]
+
+  trait MockedTossing extends Tossing {
+    def toss(board: Board, count: Int): Seq[(Int, Int)] = {
+      tossing.toss(board, count)
     }
   }
 }

@@ -19,7 +19,8 @@ object DefaultSurpriseProducer extends SurpriseProducer {
 
   private val dilemmas = IndexedSeq(
     new DilemmaSurprise(Config(1, 2, (0, 3), 0), "prisoners") with DeterministicTossing,
-    new DilemmaSurprise(Config(0, 10, (2, 0), 0), "chicken") with DeterministicTossing
+    new DilemmaSurprise(Config(0, 10, (2, 0), 0), "chicken") with DeterministicTossing/*,
+    new BoomSurprise() with DeterministicTossing*/
   )
 
   def maybeSurprise(boards: (Board, Board)): Option[Surprise] = {
@@ -37,6 +38,18 @@ trait Surprise {
   def isEligible(boards: (Board, Board)): Boolean
 
   def kind: String
+}
+
+class BoomSurprise(demolish: Int = 4) extends Surprise { this: Tossing =>
+  val kind: String = "boom"
+  def isEligible(boards: (Board, Board)): Boolean = true
+
+  def handle(outcomes: ((Board, Answer), (Board, Answer))): (CompleteSurprise, CompleteSurprise) = outcomes match {
+    case ((_, Drop), (_, Drop)) => (CompleteSurprise(), CompleteSurprise())
+    case ((_, Pick), (board, Drop)) => (CompleteSurprise(), CompleteSurprise(toss(board, demolish)))
+    case ((board, Drop), (_, Pick)) => (CompleteSurprise(toss(board, demolish)), CompleteSurprise())
+    case ((left, Pick), (right, Pick)) => (CompleteSurprise(toss(left, demolish)), CompleteSurprise(toss(right, demolish)))
+  }
 }
 
 class DilemmaSurprise(config: Config = Config(), val kind: String) extends Surprise { this: Tossing =>
