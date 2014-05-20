@@ -13,11 +13,8 @@ import actors.GameActor.Swap
 import actors.GameActor.GameFinished
 import actors.GameActor.Click
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/17/14
- */
+
+
 class PlayerActorTest extends ActorSpec {
 
   implicit class ActorRefWithJsonSend(ref: ActorRef) {

@@ -4,11 +4,8 @@ import akka.actor.{ActorRef, Actor}
 import model._
 import collection.mutable
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/16/14
- */
+
+
 class GameActor(surprises: SurpriseProducer) extends Actor {
 
   import GameActor._

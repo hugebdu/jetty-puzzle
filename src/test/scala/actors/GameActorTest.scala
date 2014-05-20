@@ -6,11 +6,8 @@ import model.Size
 import GameActor._
 import model.Surprise.Challenge
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/16/14
- */
+
+
 class GameActorTest extends ActorSpec {
 
   trait ctx extends ActorScope {

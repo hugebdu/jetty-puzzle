@@ -12,11 +12,8 @@ import actors.GamesRegistryActor.CreateInvitation
 import actors.GamesRegistryActor.Join
 import actors.GameActor.Init
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/17/14
- */
+
+
 class GamesRegistryActorTest extends ActorSpec {
   
   trait ctx extends ActorScope {

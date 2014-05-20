@@ -3,11 +3,8 @@ package model
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.specification.Scope
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/18/14
- */
+
+
 class CellsTest extends SpecificationWithJUnit {
 
   trait ctx extends Scope {

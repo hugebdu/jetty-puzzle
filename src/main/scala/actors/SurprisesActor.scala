@@ -4,11 +4,8 @@ import akka.actor.Actor
 import concurrent.duration._
 import scala.util.Random
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/20/14
- */
+
+
 class SurprisesActor extends Actor {
 
   import context._

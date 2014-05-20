@@ -1,11 +1,8 @@
 import actors.Messages.Message
 import org.json4s._
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/17/14
- */
+
+
 package object actors {
 
   import json.JsonSupport._

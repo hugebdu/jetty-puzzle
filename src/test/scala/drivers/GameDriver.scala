@@ -8,11 +8,8 @@ import org.specs2.time.NoTimeConversions
 import akka.util.Timeout
 import actors.Messages.Message
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/17/14
- */
+
+
 trait GameDriver extends NoTimeConversions with WebSocketDriver { this: ServerSpec =>
 
   implicit val timeout = Timeout(1.second)

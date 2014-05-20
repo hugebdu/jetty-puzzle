@@ -18,8 +18,8 @@ trait SurpriseProducer {
 object DefaultSurpriseProducer extends SurpriseProducer {
 
   private val dilemmas = IndexedSeq(
-    new DilemmaSurprise(Config(1, 2, (0, 3), 0), "prisoners") with DeterministicTossing,
-    new DilemmaSurprise(Config(0, 10, (2, 0), 0), "chicken") with DeterministicTossing,
+    new DilemmaSurprise(Config(cooperation = 1, defection = 2, cooperationVsDefection = (0, 3), 0), "prisoners") with DeterministicTossing,
+    new DilemmaSurprise(Config(cooperation = 0, defection = 10, cooperationVsDefection = (2, 0), 0), "chicken") with DeterministicTossing,
     new BoomSurprise() with DeterministicTossing
   )
 

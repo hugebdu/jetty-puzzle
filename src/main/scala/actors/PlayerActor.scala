@@ -14,11 +14,8 @@ import actors.GamesRegistryActor.InitGame
 import actors.GameActor.GameFinished
 import actors.GameActor.Click
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/16/14
- */
+
+
 class PlayerActor(endpoint: Endpoint) extends Actor with JsonSupport {
 
   var game: InGame = _

@@ -8,11 +8,9 @@ import actors.GameActor.CompleteSurprise
 import org.specs2.mock.mockito.MocksCreation
 import org.specs2.matcher.ThrownExpectations
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/18/14
- */
+
+
+
 class DilemmaSurpriseTest extends SpecificationWithJUnit with Mockito {
 
   trait ctx extends Scope with TossingTestSupport with ThrownExpectations {

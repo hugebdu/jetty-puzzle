@@ -5,11 +5,7 @@ import org.specs2.specification.Scope
 import actors.Messages
 import concurrent.duration._
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/19/14
- */
+
 class MovesTest extends ServerSpec with GameDriver {
 
   trait ctx extends Scope

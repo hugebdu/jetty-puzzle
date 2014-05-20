@@ -4,11 +4,8 @@ import org.specs2.mutable.SpecificationWithJUnit
 import actors.Messages.{Swap, InvalidMove, Click}
 import JsonSupport._
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/17/14
- */
+
+
 class JsonSupportTest extends SpecificationWithJUnit {
 
   "asMessage(json)" should {

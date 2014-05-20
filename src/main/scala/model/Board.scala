@@ -3,11 +3,8 @@ package model
 import collection.mutable
 import scala.util.Random
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/10/14
- */
+
+
 case class Board(cells: mutable.IndexedSeq[Cell]) {
 
   implicit val size = Size.fromCells(cells)

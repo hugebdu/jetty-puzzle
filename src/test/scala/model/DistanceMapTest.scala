@@ -2,11 +2,8 @@ package model
 
 import org.specs2.mutable.SpecificationWithJUnit
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/18/14
- */
+
+
 class DistanceMapTest extends SpecificationWithJUnit {
 
   "apply" should {

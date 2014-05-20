@@ -12,11 +12,8 @@ import json.JsonSupport._
 import org.specs2.time.NoTimeConversions
 import concurrent.duration._
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/17/14
- */
+
+
 trait WebSocketDriver extends Matchers with NoTimeConversions {
 
   import collection.mutable

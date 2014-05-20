@@ -5,11 +5,7 @@ import org.specs2.specification.Scope
 import actors.Messages.{WaitingForPair, UnknownInvitation}
 import actors.Messages
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/17/14
- */
+
 class GameInitializationTest extends ServerSpec with GameDriver {
 
   trait ctx extends Scope

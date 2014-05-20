@@ -9,11 +9,8 @@ import actors.GamesRegistryActor.CreateInvitation
 import actors.GamesRegistryActor.Join
 import actors.GameActor.Init
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/17/14
- */
+
+
 class GamesRegistryActor extends Actor with GameActorConstruction with BoardConstruction {
 
   val invitations = mutable.Map.empty[String, Invitation]

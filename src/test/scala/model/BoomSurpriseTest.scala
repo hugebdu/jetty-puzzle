@@ -7,11 +7,8 @@ import org.specs2.matcher.ThrownExpectations
 import model.Surprise.{Pick, Drop}
 import actors.GameActor.CompleteSurprise
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/20/14
- */
+
+
 class BoomSurpriseTest extends SpecificationWithJUnit with Mockito {
 
   trait ctx extends Scope with TossingTestSupport with ThrownExpectations {

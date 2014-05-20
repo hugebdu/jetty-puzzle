@@ -6,11 +6,8 @@ import org.json4s._
 import actors.Messages
 import scala.util.Try
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/17/14
- */
+
+
 trait JsonSupport {
 
   implicit val formats = MessagesFormats

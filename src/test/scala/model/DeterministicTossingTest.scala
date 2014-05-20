@@ -4,11 +4,8 @@ import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.specification.Scope
 import org.specs2.matcher.Matcher
 
-/**
- * Created with IntelliJ IDEA.
- * User: daniels
- * Date: 5/18/14
- */
+
+
 class DeterministicTossingTest extends SpecificationWithJUnit {
 
   trait ctx extends Scope with DeterministicTossing {
