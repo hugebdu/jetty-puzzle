@@ -83,7 +83,7 @@ object GameActor {
   case class Click(turn: Turn, index: Int)
   case object InvalidMove
   case class Swap(indexes: Seq[(Int, Int)])
-  case class CompleteSurprise(swaps: Seq[(Int, Int)] = Nil)
+  case class CompleteSurprise(changes: Seq[(Int, Int)] = Nil, swap: Boolean = true)
   case class GameFinished(winner: Turn)
   case object CheckForSurprises
 

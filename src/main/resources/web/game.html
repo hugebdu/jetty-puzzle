@@ -111,9 +111,11 @@
             };
 
             var challengeFinishedHandler = function(msg) {
-                $.each(msg['shuffles'], function(index, obj) {
-                    swapPair(obj);
-                });
+                if (msg['swap']) {
+                    $.each(msg['shuffles'], function(index, obj) {
+                        swapPair(obj);
+                    });
+                }
             };
 
             var initGameHandler = function(msg) {
@@ -245,7 +247,7 @@
         <li>{"type":"InitGame", "imageUrl":"http://www.galleryintell.com/wp-content/uploads/2013/06/Botero-Mona_Lisa.jpg"}</li>
         <li>{"type":"UnknownInvitation"}</li>
         <li>{"type":"StartGame", "shuffles":[{"0":"5"},{"8":"13"},{"8":"9"}]}</li>
-        <li>{"type":"ChallengeFinished", "shuffles":[{"0":"5"},{"8":"13"},{"1":"2"}]}</li>
+        <li>{"type":"ChallengeFinished", "shuffles":[{"0":"5"},{"8":"13"},{"1":"2"}], swap:true}</li>
     </ul>
 </div>
 </body>

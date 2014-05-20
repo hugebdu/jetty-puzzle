@@ -22,6 +22,18 @@ class BoomSurpriseTest extends SpecificationWithJUnit with Mockito {
 
   "handle" should {
 
+    "be None when only one drop arrived - 1" in new ctx {
+      surprise.handle(leftBoard -> Some(Drop), rightBoard -> None) must beNone
+    }
+
+    "be None when only one drop arrived - 1" in new ctx {
+      surprise.handle(leftBoard -> None, rightBoard -> Some(Drop)) must beNone
+    }
+
+    "do nothing when both dropped" in new ctx {
+      surprise.handle(leftBoard -> Some(Drop), rightBoard -> Some(Drop)) must beSome(CompleteSurprise(Nil), CompleteSurprise(Nil))
+    }
+
     "do nothing when both dropped" in new ctx {
       surprise.handle(leftBoard -> Some(Drop), rightBoard -> Some(Drop)) must beSome(CompleteSurprise(Nil), CompleteSurprise(Nil))
     }

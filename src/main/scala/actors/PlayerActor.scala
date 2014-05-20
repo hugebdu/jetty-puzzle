@@ -22,7 +22,7 @@ class PlayerActor(endpoint: Endpoint) extends Actor with JsonSupport {
 
   def challenged: Receive = {
     case JsonMessage(Messages.ChallengeOutcome(picked)) => game.actor ! (if (picked) PickedSurprise(game.turn) else DroppedSurprise(game.turn))
-    case CompleteSurprise(swaps) => endpoint ! Messages.ChallengeFinished(swaps); context.become(playing)
+    case CompleteSurprise(changes, swap) => endpoint ! Messages.ChallengeFinished(changes, swap); context.become(playing)
   }
 
   def playing: Receive = {
@@ -113,7 +113,7 @@ object Messages {
   case class GameFinished(winner: Boolean) extends Message
   case class Swap(indexes: Seq[(Int, Int)]) extends Message
   case class StartGame(shuffles: Seq[(Int, Int)]) extends Message
-  case class ChallengeFinished(shuffles: Seq[(Int, Int)]) extends Message
+  case class ChallengeFinished(shuffles: Seq[(Int, Int)], swap: Boolean = true) extends Message
   case class Challenge(kind: String, timeoutInSeconds: Int) extends Message
   case class ChallengeOutcome(picked: Boolean) extends Message
 }

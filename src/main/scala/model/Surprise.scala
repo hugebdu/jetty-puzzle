@@ -48,6 +48,8 @@ class BoomSurprise(demolish: Int = 4) extends Surprise { this: Tossing =>
 
   def handle(outcomes: ((Board, Option[Answer]), (Board, Option[Answer]))): Option[(CompleteSurprise, CompleteSurprise)] = outcomes match {
     case ((_, Some(Drop)), (_, Some(Drop))) => Some(CompleteSurprise(), CompleteSurprise())
+    case ((_, Some(Drop)), (_, None)) => None
+    case ((_, None), (_, Some(Drop))) => None
     case ((left, Some(Pick)), (right, Some(Pick))) => Some(CompleteSurprise(toss(left, demolish)), CompleteSurprise(toss(right, demolish)))
     case ((_, Some(Pick)), (board, _)) => Some(CompleteSurprise(), CompleteSurprise(toss(board, demolish)))
     case ((board, _), (_, Some(Pick))) => Some(CompleteSurprise(toss(board, demolish)), CompleteSurprise())
