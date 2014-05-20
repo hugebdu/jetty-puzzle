@@ -45,7 +45,7 @@ class PuzzleServer extends Server {
   class InvitationsServlet extends DefaultServlet {
 
     override def doPost(request: HttpServletRequest, response: HttpServletResponse): Unit = {
-      val id = Await.result((gamesRegistry ? CreateInvitation("image.gif")).mapTo[String], 1.second)
+      val id = Await.result((gamesRegistry ? CreateInvitation(request.getParameter("image"))).mapTo[String], 1.second)
       response.sendRedirect(s"game.html?id=$id")
     }
   }

@@ -20,10 +20,7 @@
 
             var zi = 1;
             var EmptySquare = 16;
-
-            var consoleHandler = function(msg) {
-                console.info(JSON.stringify(msg));
-            };
+            var squareSize;
 
             var swapHandler = function(msg) {
                 $.each(msg['indexes'], function(index, value) {
@@ -116,14 +113,22 @@
 
             var challengeFinishedHandler = function(msg) {
                 $.each(msg['shuffles'], function(index, obj) {
-                    swapPair(obj)
+                    swapPair(obj);
                 });
+            };
+
+            var initGameHandler = function(msg) {
+                $("#board").children(".cell").each(function(i){
+                    var style = "#ffffff url(" + msg['imageUrl'] + ") " + (-(i % 4) * squareSize) + "px " + -Math.floor(i / 4) * squareSize + "px no-repeat";
+                    this.style.setProperty("background", style, "important");
+                });
+                $("#board").children("div:nth-child(" + EmptySquare + ")").css({backgroundImage: "", background: "#ffffff"});
             };
 
             var messageHandlers = {};
 
             messageHandlers['WaitingForPair'] = waitingForPairHandler;
-            messageHandlers['InitGame'] = consoleHandler;               //TODO
+            messageHandlers['InitGame'] = initGameHandler;
             messageHandlers['InvalidMove'] = invalidMoveHandler;
             messageHandlers['UnknownInvitation'] = unknownInvitationHandler;
             messageHandlers['Challenge'] = challengeHandler;
@@ -164,13 +169,14 @@
             }
 
             $.fn.extend({ fifteen: function (square_size) {
+                squareSize = square_size;
                 var targetElement = "#" + $(this).attr("id");
                 var boardSize = (square_size * 4) + 'px';
                 $(targetElement).html("<div id = 'board'></div>"); // Inject DIV into target, this is our game board
                 $("#board").css({ position: 'absolute', width: boardSize, height: boardSize, border: '1px solid gray' });
                 // Populate the game board's HTML container with 15 squares
                 for (var i = 0; i < 16; i++) {
-                    var cell = $("<div style = 'position: absolute; left: " + ((i % 4) * square_size) + "px; top: " + Math.floor(i / 4) * square_size + "px; width: " + square_size + "px; height: " + square_size + "px; text-align: center; line-height: 128px; -moz-box-shadow: inset 0 0 20px #555555; -webkit-box-shadow: inset 0 0 20px #555555; box-shadow: inset 0 0 20px #555555; background: #ffffff url(images/skeleton.gif) " + (-(i % 4) * square_size) + "px " + -Math.floor(i / 4) * square_size + "px no-repeat !important'></div>");
+                    var cell = $("<div class='cell' style = 'position: absolute; left: " + ((i % 4) * square_size) + "px; top: " + Math.floor(i / 4) * square_size + "px; width: " + square_size + "px; height: " + square_size + "px; text-align: center; line-height: 128px; -moz-box-shadow: inset 0 0 20px #555555; -webkit-box-shadow: inset 0 0 20px #555555; box-shadow: inset 0 0 20px #555555; background: #ffffff url(images/skeleton.gif) " + (-(i % 4) * square_size) + "px " + -Math.floor(i / 4) * square_size + "px no-repeat !important'></div>");
                     var x = $("#board").append(cell);
                     cell.attr("id", i);
                 }
@@ -237,6 +243,7 @@
         <li>{"type":"Swap", "indexes":[{"0":"1"}]}</li>
         <li>{"type":"InvalidMove"}</li>
         <li>{"type":"WaitingForPair"}</li>
+        <li>{"type":"InitGame", "imageUrl":"http://www.galleryintell.com/wp-content/uploads/2013/06/Botero-Mona_Lisa.jpg"}</li>
         <li>{"type":"UnknownInvitation"}</li>
         <li>{"type":"StartGame", "shuffles":[{"0":"5"},{"8":"13"},{"8":"9"}]}</li>
         <li>{"type":"ChallengeFinished", "shuffles":[{"0":"5"},{"8":"13"},{"1":"2"}]}</li>

@@ -5,10 +5,28 @@
 
     <body>
         <img src="images/logo.png">
-        <h2>New game creation</h2>
+        <h2>New game</h2>
         <form action="games" method="post">
-        Image URL: <input type="text" name="imageUrl"><br/>
-        <button type="submit">Create</button>
+            <h3>Choose image:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th><input type="radio" name="image" value="images/skeleton.gif" checked></th>
+                        <th><input type="radio" name="image" value="images/inna.jpg"></th>
+                        <th><input type="radio" name="image" value="images/lena.jpg"></th>
+                        <th><input type="radio" name="image" value="images/monalisa.png"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><img src="images/skeleton.gif" width="100" height="100"></td>
+                        <td><img src="images/inna.jpg" width="100" height="100"></td>
+                        <td><img src="images/lena.jpg" width="100" height="100"></td>
+                        <td><img src="images/monalisa.png" width="100" height="100"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="submit">Create</button>
         </form>
     </body>
 </html>
