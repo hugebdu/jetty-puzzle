@@ -9,12 +9,10 @@
 
         /* How to correctly create plug in */
 
-        /*
-        var connection = {}; //TODO: websocket here
+        /*var connection = {}; //TODO: websocket here
         connection['send'] = function(msg) {
             console.info("Sending message: " + JSON.stringify(msg));
-        };
-        */
+        };*/
 
         var connection = undefined;
 
@@ -40,15 +38,28 @@
             }
 
             var invalidMoveHandler = function() {
-                alert("Invalid move");
+
             };
 
             var startGameHandler = function(msg) {
+                var positions = new Array(EmptySquare);
+
+                for (var i = 0; i < EmptySquare; i++) {
+                    var piece = $("#board").children("div:nth-child(" + (i + 1) + ")");
+                    positions[i] = {left: piece.css("left"), top: piece.css("top")};
+                }
+
                 //TODO: bug on same index swapped multiple times
                 $("#waiting").fadeTo(500, 0, function() {
                     $(this).toggle();
                     $.each(msg['shuffles'], function(index, value) {
-                        swapPair(value);
+                        $.each(value, function(x, y) {
+                            var from = parseInt(x);
+                            var to = parseInt(y);
+                            var piece = $("#board").children("div:nth-child(" + (from + 1) + ")");
+                            piece.attr("id", to);
+                            piece.animate(positions[to]);
+                        });
                     });
                 });
             };
@@ -135,14 +146,14 @@
                 a.animate({ left: newx, top: newy }, 300);
                 b.animate({ left: oldx, top: oldy }, 300);
 
-                var tmp = a.attr("id")
-                a.attr("id", b.attr("id"))
-                b.attr("id", tmp)
+                var tmp = a.attr("id");
+                a.attr("id", b.attr("id"));
+                b.attr("id", tmp);
             };
 
             function clickCell(elem) {
                 var index = parseInt($(elem).attr("id"));
-                connection.send({"type":"Click","index":index});
+                connection.send(JSON.stringify({"type":"Click","index":index}));
             }
 
             $.fn.extend({ fifteen: function (square_size) {
@@ -152,7 +163,7 @@
                 $("#board").css({ position: 'absolute', width: boardSize, height: boardSize, border: '1px solid gray' });
                 // Populate the game board's HTML container with 15 squares
                 for (var i = 0; i < 16; i++) {
-                    var cell = $("<div style = 'position: absolute; left: " + ((i % 4) * square_size) + "px; top: " + Math.floor(i / 4) * square_size + "px; width: " + square_size + "px; height: " + square_size + "px; text-align: center; line-height: 128px; -moz-box-shadow: inset 0 0 20px #555555; -webkit-box-shadow: inset 0 0 20px #555555; box-shadow: inset 0 0 20px #555555; background: #ffffff url(images/lena.jpg) " + (-(i % 4) * square_size) + "px " + -Math.floor(i / 4) * square_size + "px no-repeat !important'></div>");
+                    var cell = $("<div style = 'position: absolute; left: " + ((i % 4) * square_size) + "px; top: " + Math.floor(i / 4) * square_size + "px; width: " + square_size + "px; height: " + square_size + "px; text-align: center; line-height: 128px; -moz-box-shadow: inset 0 0 20px #555555; -webkit-box-shadow: inset 0 0 20px #555555; box-shadow: inset 0 0 20px #555555; background: #ffffff url(images/skeleton.gif) " + (-(i % 4) * square_size) + "px " + -Math.floor(i / 4) * square_size + "px no-repeat !important'></div>");
                     var x = $("#board").append(cell);
                     cell.attr("id", i);
                 }
@@ -171,10 +182,8 @@
                         .css("width", $("#board").css("width"))
                         .css("height", $("#board").css("height"));
 
-                $(targetElement).data("swap", _swapUx);
                 $(targetElement).data("dispatch", dispatch);
             }
-
             });
 
             $("#target").fifteen(128); // Create a game with 32x32 squares inside "#target" div
@@ -196,6 +205,7 @@
             connection = new WebSocket('ws://localhost:8080/ws/game/' + $.query.get("id"));
 
             connection.onmessage = function(msg) {
+                console.info("MSG RECEIVED: " + msg.data);
                 dispatch(msg.data);
             };
         });
@@ -215,7 +225,7 @@
         <li>{"type":"InvalidMove"}</li>
         <li>{"type":"WaitingForPair"}</li>
         <li>{"type":"UnknownInvitation"}</li>
-        <li>{"type":"StartGame", "shuffles":[{"0":"5"},{"8":"13"}]}</li>
+        <li>{"type":"StartGame", "shuffles":[{"0":"5"},{"8":"13"},{"8":"9"}]}</li>
     </ul>
 </div>
 </body>

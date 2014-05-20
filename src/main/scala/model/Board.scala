@@ -10,12 +10,14 @@ import scala.util.Random
  */
 case class Board(cells: mutable.IndexedSeq[Cell]) {
 
-  implicit val size = Size(math.sqrt(cells.length.toDouble).toInt)
+  implicit val size = Size.fromCells(cells)
 
   def shuffle(): Unit = {
-    swap(positionOf(Empty) -> Position(cells.length - 1))
-    val shuffled = Random.shuffle(cells.take(cells.length - 1))
-    shuffled.zipWithIndex map { _.swap } foreach { (cells.update _).tupled }
+    do {
+      swap(positionOf(Empty) -> Position(size.last))
+      val shuffled = Random.shuffle(cells.take(cells.length - 1))
+      shuffled.zipWithIndex map { _.swap } foreach { (cells.update _).tupled }
+    } while (!Board.isValid(cells))
   }
 
   def click(index: Int): Option[(Int, Int)] = {
@@ -27,10 +29,10 @@ case class Board(cells: mutable.IndexedSeq[Cell]) {
   }
 
   def shuffles: Seq[(Int, Int)] = {
-    (cellsWithPosition collect {
+    cellsWithPosition collect {
       case (cell, position) if cell.place != position =>
-        math.min(cell.place.index, position.index) -> math.max(cell.place.index, position.index)
-    }).distinct
+        (cell.place.index, position.index)
+    }
   }
 
   def click(position: Position): Option[(Int, Int)] = {
@@ -136,6 +138,25 @@ object Position {
 
 object Board {
 
+  def isValid(cells: IndexedSeq[Cell]): Boolean = {
+
+    implicit val size = Size.fromCells(cells)
+
+    val higherThan: Int => Cell => Boolean = id => {
+      case Empty => false
+      case Piece(other) => other > id
+    }
+
+    val N = (cells.zipWithIndex map {
+      case (Piece(id), index) => cells.takeRight(cells.length - index) count higherThan(id)
+      case _ => 0
+    }).sum
+
+    val e = Position(cells.indexOf(Empty)).row + 1
+
+    (N + e) % 2 != 0
+  }
+
   def create()(implicit size: Size): Board = {
     val cells = new mutable.ArrayBuffer[Cell](size.square)
     for (i <- 0 until size.square - 1) {
@@ -187,6 +208,12 @@ object DistanceMap {
 case class Size(value: Int) extends AnyVal {
   def square: Int = value * value
   def last: Int = square - 1
+}
+
+object Size {
+  def fromCells(cells: Seq[Cell]): Size = {
+    Size(math.sqrt(cells.length.toDouble).toInt)
+  }
 }
 
 sealed trait Cell {

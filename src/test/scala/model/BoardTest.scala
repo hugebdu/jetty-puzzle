@@ -2,6 +2,7 @@ package model
 
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.specification.Scope
+import org.specs2.matcher.Matcher
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,9 +12,27 @@ import org.specs2.specification.Scope
 class BoardTest extends SpecificationWithJUnit {
 
   trait ctx extends Scope {
+
     implicit val size = Size(4)
 
     lazy val board = Board.create()
+
+    def beAValidPermutation: Matcher[IndexedSeq[Cell]] = {
+      (cells: IndexedSeq[Cell]) => Board.isValid(cells)
+    }
+  }
+
+  "Board.isValid" should {
+
+    "be true for new unshuffled board" in new ctx {
+      Board.isValid(board.cells) must beTrue
+    }
+
+    "be false for known case" in new ctx {
+      board.swap(Position(13), Position(14))
+
+      Board.isValid(board.cells) must beFalse
+    }
   }
 
   "shuffles" should {
@@ -26,13 +45,20 @@ class BoardTest extends SpecificationWithJUnit {
       board.swap(Position(0, 0) -> Position(0, size.value - 1))
       board.swap(Position(1, 1) -> Position(1, 2))
 
-      board.shuffles must not(beEmpty)
+      board.shuffles must contain(exactly(
+        (0, 3),
+        (3, 0),
+        (5, 6),
+        (6, 5)))
+    }
+  }
 
-      board.shuffles foreach {
-        case (x, y) => board.swap(Position(x), Position(y))
-      }
+  "shuffle()" should {
 
-      board.isCompleted must beTrue
+    "produce a valid shuffle" in new ctx {
+      board.shuffle()
+
+      board.cells must beAValidPermutation
     }
   }
 
