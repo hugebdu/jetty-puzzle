@@ -214,7 +214,7 @@
                 $(this).fadeTo(500, 1);
             });
 
-            connection = new WebSocket('ws://localhost:8080/ws/game/' + $.query.get("id"));
+            connection = new WebSocket('ws://' + window.location.hostname + (((window.location.port != 80) && (window.location.port != 443)) ? ":" + window.location.port : "") + '/ws/game/' + $.query.get("id"));
 
             connection['logAndSend'] = function(msg) {
                 var json = JSON.stringify(msg);
