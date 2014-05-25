@@ -1,32 +1,34 @@
 <html>
-    <head>
-        <title>Puzzle on Steroids</title>
-    </head>
+<head>
+    <title>Puzzle on Steroids</title>
+</head>
 
-    <body>
-        <img src="images/logo.png">
-        <h2>New game</h2>
-        <form action="games" method="post">
-            <h3>Choose image:</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th><input type="radio" name="image" value="images/skeleton.gif" checked></th>
-                        <th><input type="radio" name="image" value="images/inna.jpg"></th>
-                        <th><input type="radio" name="image" value="images/lena.jpg"></th>
-                        <th><input type="radio" name="image" value="images/monalisa.png"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><img src="images/skeleton.gif" width="100" height="100"></td>
-                        <td><img src="images/inna.jpg" width="100" height="100"></td>
-                        <td><img src="images/lena.jpg" width="100" height="100"></td>
-                        <td><img src="images/monalisa.png" width="100" height="100"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <button type="submit">Create</button>
-        </form>
-    </body>
+
+<body background="images/background.jpg">
+<img src="images/logo.png">
+<b><p style="font-family:calibri;color;font-size:35px;bold;">New game</p></b>
+<form action="games" method="post">
+    <u><p style="font-family:calibri;color;font-size:25px;">Choose image:</p></u>
+    <table>
+        <thead>
+        <tr>
+            <th><input type="radio" name="image" value="images/skeleton.gif" checked></th>
+            <th><input type="radio" name="image" value="images/inna.jpg"></th>
+            <th><input type="radio" name="image" value="images/lena.jpg"></th>
+            <th><input type="radio" name="image" value="images/monalisa.png"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><img src="images/skeleton.gif" width="200" height="200"></td>
+            <td><img src="images/inna.jpg" width="200" height="200"></td>
+            <td><img src="images/lena.jpg" width="200" height="200"></td>
+            <td><img src="images/monalisa.png" width="200" height="200"></td>
+        </tr>
+        </tbody>
+    </table>
+    <br>
+    <button style="width:90;height:40;font-family:calibri;color;font-size:25px;bold;" type="submit" onmouseover=style="width:90;height:40;font-family:calibri;color;font-size:25px;bold;">Create</button>
+</form>
+</body>
 </html>
