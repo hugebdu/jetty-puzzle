@@ -231,11 +231,25 @@
         });
 
     </script>
-</head>
-<body>
-<h1>Puzzle on Steroids</h1>
+    <style type="text/css">
+        body {
+            margin:0px 0px; padding:0px;
+            text-align:center;
+        }
 
-<div id="target"></div>
+        #Content {
+            width:900px;
+            margin:0px auto;
+            text-align:center;
+            padding:15px;
+        }
+    </style>
+</head>
+<body background="images/background.jpg">
+<div id="Content">
+<img src="images/logo.png">
+
+<div id="target" style="margin: auto; width: 512px;"></div>
 <div id="debugging" style="position: absolute; top: 600px; opacity: 0;">
     <textarea rows="5" cols="80" id="json">{"type":"Challenge", "kind":"chicken", "timeoutInSeconds":4}</textarea>
     <button id="send">Send</button>
@@ -249,6 +263,7 @@
         <li>{"type":"StartGame", "shuffles":[{"0":"5"},{"8":"13"},{"8":"9"}]}</li>
         <li>{"type":"ChallengeFinished", "shuffles":[{"0":"5"},{"8":"13"},{"1":"2"}], swap:true}</li>
     </ul>
+</div>
 </div>
 </body>
 </html>
